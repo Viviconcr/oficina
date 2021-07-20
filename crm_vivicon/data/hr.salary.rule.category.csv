@@ -1,0 +1,12 @@
+id,code,name
+CRBASIC,CRBASIC,CR Basic
+CRPREALW,CRPREALW,CR Pre Tax Allowances
+CRPREDED,CRPREDED,CR Pre Tax Deductions
+CRGROSS,CRGROSS,Total Gross
+CRIRTAX,CRIRTAX,CR IR TAX
+CRPOSALW,CRPOSALW,CR Post Tax Allowances
+CRPOSDED,CRPOSDED,CR Post Tax Deductions
+CRNET,CRNET,Net Salary
+TERM,TERM,Termination Details
+TERMDAYAVG,TERMDAYAVG,Termination Avg Day Salary
+TERMVACAVG,TERMVACAVG,Termination Avg Vacation Salary

@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+<!-- HR SALARY RULE CATEGORIES  -->
+        <record id="CRBASIC" model="hr.salary.rule.category">
+            <field name="name">CR Basic</field>
+            <field name="code">CRBASIC</field>
+        </record>
+
+        <record id="CRPREALW" model="hr.salary.rule.category">
+            <field name="name">CR Pre Tax Allowances</field>
+            <field name="code">CRPREALW</field>
+        </record>
+
+        <record id="CRPREDED" model="hr.salary.rule.category">
+            <field name="name">CR Pre Tax Deductions</field>
+            <field name="code">CRPREDED</field>
+        </record>
+
+        <record id="CRGROSS" model="hr.salary.rule.category">
+            <field name="name">Total Gross</field>
+            <field name="code">CRGROSS</field>
+        </record>
+
+        <record id="CRIRTAX" model="hr.salary.rule.category">
+            <field name="name">CR IR TAX</field>
+            <field name="code">CRIRTAX</field>
+        </record>
+
+        <record id="CRPOSALW" model="hr.salary.rule.category">
+            <field name="name">CR Post Tax Allowances</field>
+            <field name="code">CRPOSALW</field>
+        </record>
+
+        <record id="CRPOSDED" model="hr.salary.rule.category">
+            <field name="name">CR Post Tax Deductions</field>
+            <field name="code">CRPOSDED</field>
+        </record>
+
+        <record id="CRNET" model="hr.salary.rule.category">
+            <field name="name">Net Salary</field>
+            <field name="code">CRNET</field>
+        </record>
+
+        <record id="COMP" model="hr.salary.rule.category">
+            <field name="name">Company Contribution</field>
+            <field name="code">COMP</field>
+        </record>
+
+        <record id="TERMDAYAVG" model="hr.salary.rule.category">
+            <field name="name">Termination Avg Day Salary</field>
+            <field name="code">TERMDAYAVG</field>
+        </record>
+
+        <record id="TERMVACAVG" model="hr.salary.rule.category">
+            <field name="name">Termination Avg Vacation Salary</field>
+            <field name="code">TERMVACAVG</field>
+        </record>
+
+        <record id="TERM" model="hr.salary.rule.category">
+            <field name="name">Termination Details</field>
+            <field name="code">TERM</field>
+        </record>
+
+
+<!-- HR SALARY RULES-->
+     <record id="hr_payroll_rules_employee_annual_wage" model="hr.salary.rule">
+        <field name="category_id" ref="CRBASIC"/> 
+        <field name="name">Employee Salary</field>
+        <field name="code">CRESB01</field>
+        <field name="sequence">100</field>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.wage/13 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_deducted_hours" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREDED"/>
+        <field name="name">Leave without Pay</field>
+        <field name="code">CRELV01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">105</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRELV01) and bool(inputs.CRELV01.amount) </field>
+        <field name="amount_python_compute">result = - inputs.CRELV01.amount * 8 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_extra_days" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Salary Adjustment</field>
+        <field name="code">CRESJ01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">111</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRESJ01) and bool(inputs.CRESJ01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRESJ01.amount </field>
+        <!--field name="amount_python_compute">result = inputs.CRESJ01.amount * 8 * categories.CRBASIC / 240 </field-->
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_bereavement_days" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Bereavement Pay</field>
+        <field name="code">CRELV02</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">112</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRELV02) and bool(inputs.CRELV02.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRELV02.amount * 8 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_holiday_days" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Holiday</field>
+        <field name="code">CREHP01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">113</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREHP01) and bool(inputs.CREHP01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREHP01.amount * 8 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_extra_hours" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Overtime</field>
+        <field name="code">CREOT01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">115</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREOT01) and bool(inputs.CREOT01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREOT01.amount * categories.CRBASIC * 1.5 / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_CREOT02" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Holiday Overtime</field>
+        <field name="code">CREOT02</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">116</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREOT02) and bool(inputs.CREOT02.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREOT02.amount * categories.CRBASIC * 1.5 * 2 / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_sick_hours" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Sick Pay</field>
+        <field name="code">CRESK01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">117</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRESK01) and bool(inputs.CRESK01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRESK01.amount * 4 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_maternity_hours" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Maternity Leave</field>
+        <field name="code">CREMT01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">118</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREMT01) and bool(inputs.CREMT01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREMT01.amount * 4 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_vacations" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Vacations</field>
+        <field name="code">CREVP01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">120</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREVP01) and bool(inputs.CREVP01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREVP01.amount * 8 * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_ordinary_salary" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Ordinary Salary</field>
+        <field name="code">ORDINARY</field>
+        <field name="sequence">125</field>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = ((inputs.CREHB01 and inputs.CREHB01.amount)-(inputs.CRESK01 and inputs.CRESK01.amount*8)-(inputs.CREVP01 and inputs.CREVP01.amount*8)-(inputs.CRELV02 and inputs.CRELV02.amount*8) -(inputs.CREMT01 and inputs.CREMT01.amount*8)) * categories.CRBASIC / 240 </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_perf_bonus" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Performance Bonus</field>
+        <field name="code">CREAB01</field>
+        <field name="sequence">130</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREAB01) and bool(inputs.CREAB01.amount) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.CREAB01.amount</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_referral_bonus" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Referral Bonus</field>
+        <field name="code">CREOB02</field>
+        <field name="sequence">135</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREOB02) and bool(inputs.CREOB02.amount) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.CREOB02.amount</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_promotion_bonus" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">Promotion Bonus</field>
+        <field name="code">CREOB03</field>
+        <field name="sequence">140</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREOB03) and bool(inputs.CREOB03.amount) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.CREOB03.amount</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_aip_bonus" model="hr.salary.rule">
+        <field name="category_id" ref="CRPREALW"/>
+        <field name="name">AIP Bonus</field>
+        <field name="code">CREOB04</field>
+        <field name="sequence">145</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREOB04) and bool(inputs.CREOB04.amount) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.CREOB04.amount</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_rule_gross_cr" model="hr.salary.rule">
+        <field name="category_id" ref="CRGROSS"/>
+        <field name="name">Total Gross</field>
+        <field name="sequence">150</field>
+        <field name="code">CRGROSS</field>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.CRPREDED + categories.CRPREALW</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_child_alw" model="hr.salary.rule">
+        <field name="category_id" ref="CRIRTAX"/>
+        <field name="name">Child Allowance Costa Rica</field>
+        <field name="code">ChAl</field>
+        <field name="sequence">160</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = (categories.CRGROSS+(inputs.PREVIOUS_GROSS and inputs.PREVIOUS_GROSS.amount)>714000) and bool(employee.children)</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = employee.children * 1340</field>
+        <field name="appears_on_payslip" eval="False"/>
+    </record>
+    <record id="hr_payroll_rules_spouse_alw" model="hr.salary.rule">
+        <field name="category_id" ref="CRIRTAX"/>
+        <field name="name">Spouse Allowance Costa Rica</field>
+        <field name="code">SpAl</field>
+        <field name="sequence">165</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = (categories.CRGROSS+(inputs.PREVIOUS_GROSS and inputs.PREVIOUS_GROSS.amount)>714000) and employee.marital=='married'</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = 2000 </field>
+        <field name="appears_on_payslip" eval="False"/>
+    </record>
+    <record id="hr_payroll_rules_i_r" model="hr.salary.rule">
+        <field name="category_id" ref="CRIRTAX"/> 
+        <field name="name">Withholding Income Tax Grid 2012-2013</field>
+        <field name="code">IR</field>
+        <field name="sequence">170</field>
+        <field name="amount_select">fix</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = (categories.CRGROSS+(inputs.PREVIOUS_GROSS and inputs.PREVIOUS_GROSS.amount)>714000) </field>
+        <field name="appears_on_payslip" eval="False"/>
+    </record>
+    <record id="hr_payroll_rules_pos_adj" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSALW"/>
+        <field name="name">Positive Adjust</field>
+        <field name="code">CRESJ02</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">175</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRESJ02) and bool(inputs.CRESJ02.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRESJ02.amount </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_rule_net_taxes" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Salary Tax</field>
+        <field name="sequence">180</field>
+        <field name="code">NETTAX</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = ( 0 > categories.CRIRTAX) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.CRIRTAX - (inputs.PREVIOUS_TAX and inputs.PREVIOUS_TAX.amount)</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_classes_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Portuguese Classes Deductions</field>
+        <field name="code">CRDMS10</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">190</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRDMS10) and bool(inputs.CRDMS10.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CRDMS10.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_cafeteria_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Cafeteria Deductions</field>
+        <field name="code">CRDFA10</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">191</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRDFA10) and bool(inputs.CRDFA10.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CRDFA10.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_banco_popular_loans" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Banco Popular Loans</field>
+        <field name="code">CRDLN10</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">192</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRDLN10) and bool(inputs.CRDLN10.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CRDLN10.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_gym_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Gym Deductions</field>
+        <field name="code">CREHC01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">193</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREHC01) and bool(inputs.CREHC01.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CREHC01.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_child_support_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Child Support Deductions</field>
+        <field name="code">CRDGR10</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">195</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRDGR10) and bool(inputs.CRDGR10.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CRDGR10.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_garnishment_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Garnishment Deductions</field>
+        <field name="code">CRDGR11</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">196</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRDGR11) and bool(inputs.CRDGR11.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CRDGR11.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_other_deductions" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/>
+        <field name="name">Other Deductions</field>
+        <field name="code">CREDE01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">200</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREDE01) and bool(inputs.CREDE01.amount) </field>
+        <field name="amount_python_compute">result = -inputs.CREDE01.amount</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_ccss_rule" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/> 
+        <field name="name">Social contribution</field>
+        <field name="code">CCSS</field>
+        <field name="sequence">210</field>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <!--field name="amount_python_compute">result = -trunc((categories.CRGROSS)*0.0917)</field-->
+        <field name="amount_python_compute">result = -categories.CRGROSS*0.0917</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+   </record>
+    <record id="hr_payroll_rules_ccss_comat_rule" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSDED"/> 
+        <field name="name">CO Mat</field>
+        <field name="code">COMAT</field>
+        <field name="sequence">215</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREMT01) and bool(inputs.CREMT01.amount) </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -(inputs.CREMT01.amount * 4 * categories.CRBASIC / 240) * 0.0917</field>
+        <field name="apply_to_move_line" eval="False"/>
+        <field name="appears_on_payslip" eval="True"/>
+   </record>
+    <record id="hr_rule_net_cr" model="hr.salary.rule">
+        <field name="category_id" ref="CRNET"/>
+        <field name="name">Net</field>
+        <field name="code">NETCR</field>
+        <field name="sequence">220</field>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.CRGROSS + categories.CRPOSALW + categories.CRPOSDED</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+
+<!--
+-->
+    <record id="hr_rule_term_avg_day" model="hr.salary.rule">
+        <field name="name">Termination Day Avg</field>
+        <field name="sequence" eval="300"/>
+        <field name="code">TERMDAYAVG</field>
+        <field name="category_id" ref="TERMDAYAVG"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = False and bool(contract.date_end) </field>
+        <field name="amount_select">code</field>
+        <field name="sequence">300</field>
+        <field name="amount_python_compute">result = payslip.avg_day_salary() </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_CREVP02" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSALW"/>
+        <field name="name">Termination Pending Vacations</field>
+        <field name="code">CREVP02</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">310</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CREVP02) and bool(inputs.CREVP02.amount) </field>
+        <field name="amount_python_compute">result = inputs.CREVP02.amount </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_CRES301" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSALW"/>
+        <field name="name">Bonus 13th Salary</field>
+        <field name="code">CRES301</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">320</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRES301) and bool(inputs.CRES301.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRES301.amount </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_CRES302" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSALW"/>
+        <field name="name">Advance Notice Termination</field>
+        <field name="code">CRES302</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">330</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRES302) and bool(inputs.CRES302.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRES302.amount </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    <record id="hr_payroll_rules_CRESV01" model="hr.salary.rule">
+        <field name="category_id" ref="CRPOSALW"/>
+        <field name="name">Severance</field>
+        <field name="code">CRESV01</field>
+        <field name="amount_select">code</field>
+        <field name="sequence">340</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = bool(inputs.CRESV01) and bool(inputs.CRESV01.amount) </field>
+        <field name="amount_python_compute">result = inputs.CRESV01.amount </field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+    
+<!--  payslip.date_from    payslip.date_to  payslip.sum('CRGROSS', '2012-01-01', '2013-01-31')
+            <field name="code">TERM</field>
+        <record id="TERMDAYAVG" model="hr.salary.rule.category">
+-->
+
+    <!-- Rule Inputs -->
+    <record id="hr_payroll_rules_deducted_hours_input" model="hr.rule.input">
+        <field name="code">CRELV01</field>
+        <field name="name">Leave without Pay</field>
+        <field name="input_id" ref="hr_payroll_rules_deducted_hours"/>
+    </record>
+    <record id="hr_payroll_rules_extra_days_input" model="hr.rule.input">
+        <field name="code">CRESJ01</field>
+        <field name="name">Salary Adjustmen</field>
+        <field name="input_id" ref="hr_payroll_rules_extra_days"/>
+    </record>
+    <record id="hr_payroll_rules_bereavement_days_input" model="hr.rule.input">
+        <field name="code">CRELV02</field>
+        <field name="name">Bereavement Days</field>
+        <field name="input_id" ref="hr_payroll_rules_bereavement_days"/>
+    </record>
+    <record id="hr_payroll_rules_holiday_days_input" model="hr.rule.input">
+        <field name="code">CREHP01</field>
+        <field name="name">Holiday</field>
+        <field name="input_id" ref="hr_payroll_rules_holiday_days"/>
+    </record>
+    <record id="hr_payroll_rules_pos_adj_input" model="hr.rule.input">
+        <field name="code">CRESJ02</field>
+        <field name="name">Positive Adjustments</field>
+        <field name="input_id" ref="hr_payroll_rules_pos_adj"/>
+    </record>
+    <record id="hr_payroll_rules_extra_hours_input" model="hr.rule.input">
+        <field name="code">CREOT01</field>
+        <field name="name">Overtime</field>
+        <field name="input_id" ref="hr_payroll_rules_extra_hours"/>
+    </record>
+    <record id="hr_payroll_rules_CREOT02_input" model="hr.rule.input">
+        <field name="code">CREOT02</field>
+        <field name="name">Holiday Overtime</field>
+        <field name="input_id" ref="hr_payroll_rules_CREOT02"/>
+    </record>
+    <record id="hr_payroll_rules_sick_hours_input" model="hr.rule.input">
+        <field name="code">CRESK01</field>
+        <field name="name">Sick Pay</field>
+        <field name="input_id" ref="hr_payroll_rules_sick_hours"/>
+    </record>
+    <record id="hr_payroll_rules_maternity_hours_input" model="hr.rule.input">
+        <field name="code">CREMT01</field>
+        <field name="name">Maternity Leave</field>
+        <field name="input_id" ref="hr_payroll_rules_maternity_hours"/>
+    </record>
+    <record id="hr_payroll_rules_vacations_input" model="hr.rule.input">
+        <field name="code">CREVP01</field>
+        <field name="name">Vacations</field>
+        <field name="input_id" ref="hr_payroll_rules_vacations"/>
+    </record>
+    <record id="hr_payroll_rules_perf_bonus_input" model="hr.rule.input">
+        <field name="code">CREAB01</field>
+        <field name="name">Performance Bonus</field>
+        <field name="input_id" ref="hr_payroll_rules_perf_bonus"/>
+    </record>
+    <record id="hr_payroll_rules_referral_bonus_input" model="hr.rule.input">
+        <field name="code">CREOB02</field>
+        <field name="name">Referral Bonus</field>
+        <field name="input_id" ref="hr_payroll_rules_referral_bonus"/>
+    </record>
+    <record id="hr_payroll_rules_promotion_bonus_input" model="hr.rule.input">
+        <field name="code">CREOB03</field>
+        <field name="name">Promotion Bonus</field>
+        <field name="input_id" ref="hr_payroll_rules_promotion_bonus"/>
+    </record>
+    <record id="hr_payroll_rules_aip_bonus_input" model="hr.rule.input">
+        <field name="code">CREOB04</field>
+        <field name="name">AIP Bonus</field>
+        <field name="input_id" ref="hr_payroll_rules_aip_bonus"/>
+    </record>
+    <record id="hr_payroll_rules_classes_deductions_input" model="hr.rule.input">
+        <field name="code">CRDMS10</field>
+        <field name="name">Classes Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_classes_deductions"/>
+    </record>
+    <record id="hr_payroll_rules_cafeteria_deductions_input" model="hr.rule.input">
+        <field name="code">CRDFA10</field>
+        <field name="name">Cafeteria Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_cafeteria_deductions"/>
+    </record>
+    <record id="hr_payroll_rules_gym_deductions_input" model="hr.rule.input">
+        <field name="code">CREHC01</field>
+        <field name="name">Gym Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_gym_deductions"/>
+    </record>
+    <record id="hr_payroll_rules_child_support_deductions_input" model="hr.rule.input">
+        <field name="code">CRDGR10</field>
+        <field name="name">Child Support Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_child_support_deductions"/>
+    </record>
+    <record id="hr_payroll_rules_garnishment_deductions_input" model="hr.rule.input">
+        <field name="code">CRDGR11</field>
+        <field name="name">Garnishment Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_garnishment_deductions"/>
+    </record>
+    <record id="hr_payroll_rules_banco_popular_loans_input" model="hr.rule.input">
+        <field name="code">CRDLN10</field>
+        <field name="name">Banco Popular Loans</field>
+        <field name="input_id" ref="hr_payroll_rules_banco_popular_loans"/>
+    </record>
+    <record id="hr_payroll_rules_other_deductions_input" model="hr.rule.input">
+        <field name="code">CREDE01</field>
+        <field name="name">Other Deductions</field>
+        <field name="input_id" ref="hr_payroll_rules_other_deductions"/>
+    </record>
+
+    <record id="hr_payroll_rules_CREVP02_input" model="hr.rule.input">
+        <field name="code">CREVP02</field>
+        <field name="name">Termination Pending Vacations</field>
+        <field name="input_id" ref="hr_payroll_rules_CREVP02"/>
+    </record>
+    <record id="hr_payroll_rules_CRES301_input" model="hr.rule.input">
+        <field name="code">CRES301</field>
+        <field name="name">Bonus 13th Salary</field>
+        <field name="input_id" ref="hr_payroll_rules_CRES301"/>
+    </record>
+   <record id="hr_payroll_rules_CRES302_input" model="hr.rule.input">
+        <field name="code">CRES302</field>
+        <field name="name">Advance Notice Termination</field>
+        <field name="input_id" ref="hr_payroll_rules_CRES302"/>
+    </record>
+    <record id="hr_payroll_rules_CRESV01_input" model="hr.rule.input">
+        <field name="code">CRESV01</field>
+        <field name="name">Severance</field>
+        <field name="input_id" ref="hr_payroll_rules_CRESV01"/>
+    </record>
+    
+    
+    <!-- Salary Structure
+    ,ref('hr_rule_term_avg_day')
+     -->
+    <record id="hr_payroll_monthly_salary_structure_employee_cr" model="hr.payroll.structure">
+        <field name="code">C.R.EMP.MONTH</field>
+        <field name="name">Costa Rican Employee - Monthly</field>
+        <field eval="[(6, 0, [ref('hr_payroll_rules_employee_annual_wage'),
+            				  ref('hr_payroll_rules_deducted_hours'),
+            				  ref('hr_payroll_rules_extra_hours'),
+            				  ref('hr_payroll_rules_CREOT02'),
+            				  ref('hr_payroll_rules_extra_days'),
+            				  ref('hr_payroll_rules_bereavement_days'),
+            				  ref('hr_payroll_rules_holiday_days'),
+            				  ref('hr_payroll_rules_pos_adj'),
+            				  ref('hr_payroll_rules_sick_hours'),
+            				  ref('hr_payroll_rules_maternity_hours'),
+            				  ref('hr_payroll_rules_vacations'),
+            				  ref('hr_payroll_rules_ordinary_salary'),
+            				  ref('hr_payroll_rules_perf_bonus'),
+            				  ref('hr_payroll_rules_referral_bonus'),
+            				  ref('hr_payroll_rules_promotion_bonus'),
+            				  ref('hr_payroll_rules_aip_bonus'),
+            				  ref('hr_rule_gross_cr'),
+            				  ref('hr_payroll_rules_child_alw'),
+            				  ref('hr_payroll_rules_spouse_alw'),
+            				  ref('hr_payroll_rules_i_r'),
+            				  ref('hr_rule_net_taxes'),
+            				  ref('hr_payroll_rules_classes_deductions'),
+            				  ref('hr_payroll_rules_cafeteria_deductions'),
+            				  ref('hr_payroll_rules_gym_deductions'),
+            				  ref('hr_payroll_rules_garnishment_deductions'),
+            				  ref('hr_payroll_rules_child_support_deductions'),
+            				  ref('hr_payroll_rules_banco_popular_loans'),
+            				  ref('hr_payroll_rules_other_deductions'),
+            				  ref('hr_payroll_rules_ccss_rule'),
+            				  ref('hr_payroll_rules_ccss_comat_rule'),
+            				  ref('hr_rule_term_avg_day'),
+            				  ref('hr_payroll_rules_CREVP02'),
+            				  ref('hr_payroll_rules_CRES301'),
+            				  ref('hr_payroll_rules_CRES302'),
+            				  ref('hr_payroll_rules_CRESV01'),
+            				  ref('hr_rule_net_cr')])]" 
+               name="rule_ids"/>
+        <field name="company_id" ref="base.main_company"/>    
+        <field name="parent_id"></field>    
+    </record>
+    </data>
+</openerp>
