@@ -1,29 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
-
-class NegociacionCRM(models.Model):
-    _name = 'negociacion.crm'
-    _description = 'Negociación CRM'
-
-    @api.model
-    def _getCategId(self):
-        return [('categ_id', '=', self.env.ref('crm_vivicon.product_category_negociacion_crm').id)]
-
-    lead_id = fields.Many2one(
-        'crm.lead', 
-        string='Oportunidad asociada', 
-        required=True,
-    )
-    tipo_negociacion = fields.Many2one(
-        'product.product', 
-        string='Tipo de Negociación', 
-        required=True,
-        domain=_getCategId,
-    )
-    descripcion = fields.Char('Descripción', required=True)
-    moneda = fields.Many2one('res.currency', 'Currency', ) #default='USD'
-    monto = fields.Monetary(string='Monto', currency_field='moneda', required=True, readonly=False)
+from odoo import models, fields, api, _
 
 
 class Lead(models.Model):
@@ -41,7 +18,8 @@ class Lead(models.Model):
     #numero_casa = fields.Char('Numero de casa')
     fecha_posible = fields.Date(string='Posible formalización', )
     fecha_reserva = fields.Date(string='Fecha reserva', )
-    metodo_pago = fields.Many2one('account.journal', string='Método de pago', domain="[('type', 'in', ('bank', 'cash'))]", )
+    # metodo_pago = fields.Many2one('account.journal', string='Método de pago', domain="[('type', 'in', ('bank', 'cash'))]", )
+    metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )
     moneda = fields.Many2one('res.currency', 'Currency', ) #default='USD'
     monto_pago = fields.Monetary(string='Monto', currency_field='moneda', required=True, readonly=False)
     numero_comprobante = fields.Char('# Comprobante')
@@ -172,9 +150,3 @@ class Lead(models.Model):
             self.frecuencia_seguimiento = 'quincenal'
         else:
             self.frecuencia_seguimiento = 'semanal'
-
-
-class ResConfigSettings(models.TransientModel):
-    _inherit = 'res.config.settings'
-
-    group_aprobar_negociaciones = fields.Boolean(string="Puede aprobar negociaciones", implied_group='crm_vivicon.group_aprobar_negociaciones')

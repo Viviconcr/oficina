@@ -1,25 +1,26 @@
+# -*- coding: utf-8 -*-
 
 {
     'name': 'VIVICON - CRM Modifications',
     'category': 'Localization',
+    'version': '1.0',
+    'summary': 'CRM Modifications to adapt VIVICON needs',
+    'description': """
+    """,
     'author': 'Prointec S.A.',
     'depends': [
-        'crm', 
-    ],
-    'version': '1.0',
-    'description': """
-CRM Modifications to adapt VIVICON needs
-    """,
-
-    'auto_install': False,
-    'demo': [
+        'crm', 'stock', 
     ],
     'data':[
-         'security/ir.model.access.csv',
-         'data/crm_vivicon_data.xml',
-         'crm_vivicon.xml',
+        'data/crm_metodos_pago_data.xml',
+        'data/crm_vivicon_data.xml',
+        'views/stock_production_lot_views.xml',
+        'views/res_config_settings_views.xml',
+        'views/crm_metodos_pago_views.xml',
+        'views/crm_lead_views.xml',
+        'views/menu_views.xml',
+        'security/ir.model.access.csv',
     ],
-    'installable': True
+    'installable': True,
+    'auto_install': False,
 }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
