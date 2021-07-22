@@ -12,8 +12,8 @@ class Lead(models.Model):
 
     modelo_interes = fields.Many2many(
         'product.product', 'crm_modelo_interes_rel', 'lead_id', 'tag_id',
-        string='Modelos de interes',
-        domain=_getCategId,
+        string='Modelos de interés',
+        domain=_getCategId, required=True,
         help="Modelos que le interesan al cliente")
     #numero_casa = fields.Char('Numero de casa')
     fecha_posible = fields.Date(string='Posible formalización', )
@@ -23,6 +23,7 @@ class Lead(models.Model):
     moneda = fields.Many2one('res.currency', 'Currency', ) #default='USD'
     monto_pago = fields.Monetary(string='Monto', currency_field='moneda', required=True, readonly=False)
     numero_comprobante = fields.Char('# Comprobante')
+    copia_comprobante = fields.Binary( string="Copia de comprobante", required=False, copy=False, attachment=True)
 
 
     # convertir a adjunto estos campos:
@@ -35,6 +36,7 @@ class Lead(models.Model):
     #req_fecha_contrato_listo = fields.Date(string='Contrato listo', )
 
     req_fecha_formalizacion = fields.Date(string='Fecha de formalización', )
+    entidad_bancaria = fields.Char('Entidad bancaria')
 
     porcentaje_plazo = fields.Float(string='Porcentaje de Plazo (%)', digits='Product Price')
     porcentaje_interes = fields.Float(string='Porcentaje de Interés (%)', digits='Product Price')
@@ -68,7 +70,7 @@ class Lead(models.Model):
         ('telefono', 'Llamada telefónica'),
         ('mensaje', 'Mensaje texto/Whatsapp'),
         ('correo', 'Correo electrónico'),
-    ], string='Medio preferido de Contacto', default=False, )
+    ], string='Medio preferido de Contacto', default=False, required=True )
     frecuencia_seguimiento = fields.Selection([
         ('semanal', 'Semanal'),
         ('quincenal', 'Quincenal'),
@@ -143,10 +145,10 @@ class Lead(models.Model):
             }
             activity = self.env['mail.activity'].sudo().create(values)
             activity._onchange_activity_type_id()
+            if total < 50:
+                self.frecuencia_seguimiento = 'mensual'
+            elif total < 70:
+                self.frecuencia_seguimiento = 'quincenal'
+            else:
+                self.frecuencia_seguimiento = 'semanal'
 
-        if total < 50:
-            self.frecuencia_seguimiento = 'mensual'
-        elif total < 70:
-            self.frecuencia_seguimiento = 'quincenal'
-        else:
-            self.frecuencia_seguimiento = 'semanal'

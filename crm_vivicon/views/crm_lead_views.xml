@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record model="ir.ui.view" id="crm_lead_view_kanban_vivicon">
+        <field name="name">crm.lead.view.kanban.vivicon</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="replace">
+                <field name="partner_id" invisible="1"/>
+            </field>        
+            <field name="expected_revenue" position="replace">
+                <field name="expected_revenue" invisible="1"/>
+            </field>        
+            <field name="priority" position="replace">
+                <field name="priority" invisible="1"/>
+            </field>        
+        </field>        
+    </record>        
+
     <record model="ir.ui.view" id="crm_lead_view_form_vivicon">
         <field name="name">crm.lead.view.form.vivicon</field>
         <field name="model">crm.lead</field>
@@ -18,11 +35,12 @@
             </field>
             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="replace">
                 <field name="partner_id" invisible="1"/>
-                <h2>Contacto</h2>
+                <h2>Prospecto</h2>
                 <field name="name" string="Nombre"/>
             </xpath>        
             <xpath expr="//group[@name='opportunity_partner']" position="inside">
                 <field name="metodo_contacto"/>
+                <field name="modelo_interes" widget="many2many_tags" options="{'no_create': True}"/>
                 <field name="user_id" string="Asesor"/>
             </xpath>        
 
@@ -40,7 +58,6 @@
                 <field name="contact_name" id="contact_name_page_lead" string="Nombre"/>
                 <field name="function" string="Correo electrónico"/>
                 <field name="mobile" id="mobile_page_lead" string="Teléfono" widget="phone"/>
-                <field name="modelo_interes" widget="many2many_tags" options="{'no_create': True}"/>
             </field>   
             <page name="extra" position="replace"/>
             <page name="lead" position="replace"/>
@@ -49,7 +66,7 @@
             </page-->
             <page name="internal_notes" position="replace">
                 <page string="Origen" name="origen">
-                    <!--attrs="{'invisible': ['|','|',('stage_id', '&lt;', 1),('stage_id', '=', 2),('stage_id', '=', 3)]}"-->
+<!--attrs="{'invisible': ['|','|',('stage_id', '&lt;', 1),('stage_id', '=', 2),('stage_id', '=', 3)]}"-->
                     <group string="Origen de Oportunidad">
                         <group>
                             <field name="source_id" string="Cómo nos contactó?"/>
@@ -72,7 +89,7 @@
                     </group>
                 </page>
                 <page string="Reserva" name="reserva">
-                    <!--attrs="{'invisible': ['|',('stage_id', '=', 1),('stage_id', '=', 2)]}"-->
+<!--attrs="{'invisible': ['|',('stage_id', '=', 1),('stage_id', '=', 2)]}"-->
                     <group name="reserva_general">
                         <group >
                             <field name="fecha_posible"/>
@@ -82,10 +99,11 @@
                         <group >
                             <field name="numero_comprobante"/>
                             <field name="monto_pago"/>
+                            <field name="copia_comprobante"/>
                         </group>
                     </group>
                 </page>
-                <page string="Negociación" name="negociacion">
+                <page string="Negociación" name="negociacion" attrs="{'invisible': [('stage_id', '&lt;', 3)]}">
                     <group>
                         <field name="negociacion_solicitada" attrs="{'readonly': [('negociacion_aprobada','=',True)]}"/>
                         <field name="negociacion_aprobada"/>
@@ -124,6 +142,7 @@
                         <group>
                             <!--field name="req_fecha_contrato_listo"/-->
                             <field name="req_fecha_formalizacion"/>
+                            <field name="entidad_bancaria"/>
                         </group>
                     </group>
                 </page>

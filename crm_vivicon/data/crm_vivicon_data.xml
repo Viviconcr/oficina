@@ -10,27 +10,6 @@
             <field name="parent_id" ref="product.product_category_1"/>
             <field name="name">Proyectos Constructivos</field>
         </record>
-        <record id="product_product_Avenir_IlusionA" model="product.product">
-            <field name="name">Avenir - Ilusión A</field>
-            <field name="categ_id" ref="product_category_proyectos_crm"/>
-            <field name="purchase_ok">False</field>
-        </record>
-        <record id="product_product_Avenir_IlusionB" model="product.product">
-            <field name="name">Avenir - Ilusión B</field>
-            <field name="categ_id" ref="product_category_proyectos_crm"/>
-            <field name="purchase_ok">False</field>
-        </record>
-        <record id="product_product_Garzas_EsperanzaA" model="product.product">
-            <field name="name">Las Garzas - Esperanza A</field>
-            <field name="categ_id" ref="product_category_proyectos_crm"/>
-            <field name="purchase_ok">False</field>
-        </record>
-        <record id="product_product_Garzas_EsperanzaB" model="product.product">
-            <field name="name">Las Garzas - Esperanza B</field>
-            <field name="categ_id" ref="product_category_proyectos_crm"/>
-            <field name="purchase_ok">False</field>
-        </record>
-
 
         <record id="crm_vivicon.product_category_negociacion_crm" model="product.category">
             <field name="parent_id" ref="product.product_category_1"/>
@@ -48,7 +27,7 @@
             <field name="purchase_ok">False</field>
         </record>
         <record id="product_product_regalia_menaje" model="product.product">
-            <field name="name">Regalía menaje</field>
+            <field name="name">Regalía línea blanca</field>
             <field name="categ_id" ref="product_category_negociacion_crm"/>
             <field name="purchase_ok">False</field>
         </record>
