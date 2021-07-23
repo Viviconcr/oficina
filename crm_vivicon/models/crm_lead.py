@@ -75,7 +75,7 @@ class Lead(models.Model):
     ], string='Frecuencia de seguimiento', readonly=False, )
 
 
-    negociacion_solicitada = fields.Boolean(string='solicitar aprobación', help="Bloquear la negociación y solicitar aprobación" )
+    negociacion_solicitada = fields.Boolean(string='Solicitar aprobación', help="Bloquear la negociación y solicitar aprobación" )
     negociacion_aprobada = fields.Boolean(string='Negociación aprobada', )
     negociacion_ids = fields.One2many('negociacion.crm', 'lead_id', 'Negociaciones')
 
