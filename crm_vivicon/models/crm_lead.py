@@ -144,12 +144,12 @@ class Lead(models.Model):
 
     @api.onchange('req_conozca_cliente', 'req_hoja_datos_propiedad', 'req_copia_cedula')
     def on_change_documentos(self):
-        if req_conozca_cliente and req_hoja_datos_propiedad and req_copia_cedula:
+        if self.req_conozca_cliente and self.req_hoja_datos_propiedad and self.req_copia_cedula:
             if self.stage_id.sequence < 5:
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
 
     @api.onchange('req_cumple_firma_contrato')
     def on_change_cumple_firma(self):
-        if req_conozca_cliente and req_hoja_datos_propiedad and req_copia_cedula:
+        if self.req_cumple_firma_contrato:
             if self.stage_id.sequence < 6:
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)
