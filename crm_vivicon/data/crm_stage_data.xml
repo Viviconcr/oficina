@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record model="crm.stage" id="crm.stage_lead2">
+        <field name="name">Contacto</field>
+        <field name="sequence">1</field>
+    </record>
+    <record model="crm.stage" id="crm.stage_lead1">
+        <field name="name">Prospecto</field>
+        <field name="sequence">2</field>
+    </record>
+    <record model="crm.stage" id="crm.stage_lead3">
+        <field name="name">Oport.Reserva</field>
+        <field name="sequence">3</field>
+    </record>
+    <record model="crm.stage" id="crm_vivicon.stage_lead4b">
+        <field name="name">Oport.Documentos</field>
+        <field name="fold" eval="False"/>
+        <field name="is_won">True</field>
+        <field name="sequence">4</field>
+    </record>
+    <record model="crm.stage" id="crm_vivicon.stage_lead5">
+        <field name="name">Reserva Completa</field>
+        <field name="sequence">5</field>
+    </record>
+    <record model="crm.stage" id="crm.stage_lead4">
+        <field name="name">Formalización</field>
+        <field name="fold" eval="False"/>
+        <field name="is_won">True</field>
+        <field name="sequence">6</field>
+    </record>
+    <record model="crm.stage" id="crm_vivicon.stage_lead7">
+        <field name="name">Oport.Retiros</field>
+        <field name="fold" eval="True"/>
+        <field name="sequence">7</field>
+    </record>
+</odoo>

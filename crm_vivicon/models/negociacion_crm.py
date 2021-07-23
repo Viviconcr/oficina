@@ -22,5 +22,6 @@ class NegociacionCRM(models.Model):
         domain=_getCategId,
     )
     descripcion = fields.Char('Descripción', required=True)
-    moneda = fields.Many2one('res.currency', 'Currency', ) #default='USD'
-    monto = fields.Monetary(string='Monto', currency_field='moneda', required=True, readonly=False)
+    company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company.id)
+    company_currency = fields.Many2one("res.currency", string='Currency', related='company_id.currency_id', readonly=True)
+    monto = fields.Monetary(string='Monto', currency_field='company_currency', required=True, readonly=False)

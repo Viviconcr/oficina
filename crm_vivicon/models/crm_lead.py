@@ -15,13 +15,10 @@ class Lead(models.Model):
         string='Modelos de interés',
         domain=_getCategId, required=True,
         help="Modelos que le interesan al cliente")
-    #numero_casa = fields.Char('Numero de casa')
     fecha_posible = fields.Date(string='Posible formalización', )
     fecha_reserva = fields.Date(string='Fecha reserva', )
-    # metodo_pago = fields.Many2one('account.journal', string='Método de pago', domain="[('type', 'in', ('bank', 'cash'))]", )
     metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )
-    moneda = fields.Many2one('res.currency', 'Currency', ) #default='USD'
-    monto_pago = fields.Monetary(string='Monto', currency_field='moneda', required=True, readonly=False)
+    monto_pago = fields.Monetary(string='Monto', currency_field='company_currency', required=False, readonly=False)  ## required
     numero_comprobante = fields.Char('# Comprobante')
     copia_comprobante = fields.Binary( string="Copia de comprobante", required=False, copy=False, attachment=True)
 
@@ -70,7 +67,7 @@ class Lead(models.Model):
         ('telefono', 'Llamada telefónica'),
         ('mensaje', 'Mensaje texto/Whatsapp'),
         ('correo', 'Correo electrónico'),
-    ], string='Medio preferido de Contacto', default=False, required=True )
+    ], string='Medio preferido de Contacto', default=False, required=False )  ## required
     frecuencia_seguimiento = fields.Selection([
         ('semanal', 'Semanal'),
         ('quincenal', 'Quincenal'),
@@ -109,10 +106,30 @@ class Lead(models.Model):
             activity = self.env['mail.activity'].sudo().create(values)
             activity._onchange_activity_type_id()
 
+    @api.onchange('plazo_decidir', 'interes_disposicion', 'capacidad_economica')
+    def on_change_calificacion(self):
+        total = 0
+        total = (int(self.plazo_decidir) + int(self.interes_disposicion) + int(self.capacidad_economica)) / 3.0
+        self.calificacion = total
+
+        if self.stage_id.name == 'Contacto':
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+
+        if total < 50:
+            self.frecuencia_seguimiento = 'mensual'
+        elif total < 70:
+            self.frecuencia_seguimiento = 'quincenal'
+        else:
+            self.frecuencia_seguimiento = 'semanal'
+
+    @api.onchange('user_id')
+    def on_change_asesor(self):
+        if self.stage_id.sequence < 2:
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
-    def reserva_completa(self):
-        if self.stage_id.name == 'Prospecto' and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
+    def opor_reserva(self):
+        if self.stage_id.sequence < 3 and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
             self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
 
             values = {
@@ -124,31 +141,15 @@ class Lead(models.Model):
             }
             activity = self.env['mail.activity'].sudo().create(values)
             activity._onchange_activity_type_id()
-    
 
-    @api.onchange('plazo_decidir', 'interes_disposicion', 'capacidad_economica')
-    def on_change_calificacion(self):
-        total = 0
-        total = (int(self.plazo_decidir) + int(self.interes_disposicion) + int(self.capacidad_economica)) / 3.0
-        self.calificacion = total
+    @api.onchange('req_conozca_cliente', 'req_hoja_datos_propiedad', 'req_copia_cedula')
+    def on_change_documentos(self):
+        if req_conozca_cliente and req_hoja_datos_propiedad and req_copia_cedula:
+            if self.stage_id.sequence < 5:
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
 
-        if self.stage_id.name == 'Contacto':
-            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
-
-        if self.plazo_decidir and self.interes_disposicion and self.capacidad_economica and not self.frecuencia_seguimiento:
-            values = {
-                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'note': 'Pendiente realizar primer contacto de seguimiento. ',
-                'res_id': self.ids[0],
-                'res_model_id': self.env['ir.model']._get('crm.lead').id,
-                'user_id': self.user_id.id,
-            }
-            activity = self.env['mail.activity'].sudo().create(values)
-            activity._onchange_activity_type_id()
-            if total < 50:
-                self.frecuencia_seguimiento = 'mensual'
-            elif total < 70:
-                self.frecuencia_seguimiento = 'quincenal'
-            else:
-                self.frecuencia_seguimiento = 'semanal'
-
+    @api.onchange('req_cumple_firma_contrato')
+    def on_change_cumple_firma(self):
+        if req_conozca_cliente and req_hoja_datos_propiedad and req_copia_cedula:
+            if self.stage_id.sequence < 6:
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)

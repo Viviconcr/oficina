@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<odoo>
+
+    <!-- Mail template are declared in a NOUPDATE block
+         so users can freely customize/delete them -->
+    <data noupdate="1">
+        <!--Email template -->
+        <record id="email_template_correo_reserva" model="mail.template">
+            <field name="name">CRM: Correo de Reserva</field>
+            <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <!--field name="subject">${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})</field-->
+            <field name="subject">Se reserva la propiedad de Prospecto ${object.name}</field>
+            <field name="email_to">Tramite_ventas@vivicon.co.cr</field>
+            <field name="model_id" ref="crm.model_crm_lead" />
+            <field name="auto_delete" eval="True" />
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="html">
+<div>
+    <p>
+        Reciban un cordial saludo
+        Es mi interés hacer de su conocimiento que la propiedad <strong> 646, Avenir Condominio - Armonía Plus</strong>,
+        fue reservada por el cliente ${object.name}. 
+        La fecha de formalización estimada será el día: ${object.fecha_posible}. 
+    </p>
+    <p style="color:#888888">
+        % if object.user_id and object.user_id.signature:
+        ${object.user_id.signature | safe}
+        % endif
+    </p>
+</div>
+            </field>
+        </record>
+
+        <record id="email_template_documentos_cargados" model="mail.template">
+            <field name="name">CRM: Documentos de Reserva</field>
+            <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <!--field name="subject">${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})</field-->
+            <field name="subject">Se adjuntaron los documentos de reserva, cliente  ${object.name}, proyecto  ${object.proyecto_interes}. </field>
+            <field name="email_to">karias@vivicon1.co.cr</field>
+            <field name="model_id" ref="crm.model_crm_lead" />
+            <field name="auto_delete" eval="True" />
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="html">
+<div>
+    <p>
+        Reciba un cordial saludo
+        ${object.user_id.name}, ha completado los documentos de reserva del cliente ${object.name}, por favor verificar dicha información.
+    </p>
+    <p style="color:#888888">
+        % if object.user_id and object.user_id.signature:
+        ${object.user_id.signature | safe}
+        % endif
+    </p>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>
