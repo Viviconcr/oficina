@@ -57,6 +57,11 @@
             <xpath expr="//div[@class='oe_title']" position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
+
+            <xpath expr="//header/field[@name='stage_id']" position="attributes">
+                <attribute name="attrs">{'readonly':1, 'invisible': ['|', ('active', '=', False), ('type', '=', 'lead')] }</attribute>
+            </xpath>
+
             <field name="user_id" position="replace">
             </field>        
             <field name="expected_revenue" position="replace">
