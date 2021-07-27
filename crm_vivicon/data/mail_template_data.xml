@@ -3,8 +3,27 @@
 
     <!-- Mail template are declared in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="1">
+    <data noupdate="0">
         <!--Email template -->
+        <record id="email_template_actividad_atrasada" model="mail.template">
+            <field name="name">CRM: Actividad atrasada</field>
+            <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <!--field name="subject">${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})</field-->
+            <field name="subject">Hay actividades atrasadas para el prospecto ${object.name}</field>
+            <field name="email_to">Tramite_ventas@vivicon.co.cr</field>
+            <field name="model_id" ref="crm.model_crm_lead" />
+            <field name="auto_delete" eval="True" />
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="html">
+<div>
+    <p>
+        Reciban un cordial saludo,<br/>
+        Les informamos que el prospecto <strong> ${object.name}</strong> asignado a <strong> ${object.user_id.name}</strong>  presenta actividades pendientes atrasadas.
+    </p>
+</div>
+            </field>
+        </record>
+
         <record id="email_template_correo_reserva" model="mail.template">
             <field name="name">CRM: Correo de Reserva</field>
             <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
@@ -17,8 +36,8 @@
             <field name="body_html" type="html">
 <div>
     <p>
-        Reciban un cordial saludo
-        Es mi interés hacer de su conocimiento que la propiedad <strong> 646, Avenir Condominio - Armonía Plus</strong>,
+        Reciban un cordial saludo,
+        Es mi interés hacer de su conocimiento que la propiedad <strong> ${object.proyecto_interes}</strong>,
         fue reservada por el cliente ${object.name}. 
         La fecha de formalización estimada será el día: ${object.fecha_posible}. 
     </p>
@@ -39,12 +58,97 @@
             <field name="email_to">karias@vivicon1.co.cr</field>
             <field name="model_id" ref="crm.model_crm_lead" />
             <field name="auto_delete" eval="True" />
-            <field name="lang">${object.partner_id.lang}</field>
+            <field name="lang">${object.user_id.lang}</field>
             <field name="body_html" type="html">
 <div>
     <p>
         Reciba un cordial saludo
-        ${object.user_id.name}, ha completado los documentos de reserva del cliente ${object.name}, por favor verificar dicha información.
+        <strong>${object.user_id.name}</strong> ha completado los documentos de reserva del cliente <strong>${object.name}</strong>, por favor verificar dicha información.
+    </p>
+    <p style="color:#888888">
+        % if object.user_id and object.user_id.signature:
+        ${object.user_id.signature | safe}
+        % endif
+    </p>
+</div>
+            </field>
+        </record>
+
+        <record id="email_template_solicitud_aprobacion" model="mail.template">
+            <field name="name">CRM: Validación de negociación</field>
+            <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <!--field name="subject">${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})</field-->
+            <field name="subject">Validación para la negociación de la Oportunidad de ${object.name}. </field>
+            <field name="email_to">agonzalez@vivicon1.co.cr</field>
+            <field name="model_id" ref="crm.model_crm_lead" />
+            <field name="auto_delete" eval="True" />
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html" type="xml">
+<table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
+<tbody>
+    <tr>
+        <td align="left" style="min-width: 590px;">
+        Reciba un cordial saludo<br/>
+        <strong>${object.user_id.name}</strong> solicita validación de la negociación relacionada a la Oportunidad de <strong>${object.name}</strong>, por el siguiente motivo:
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="200">
+                        Tipo Negociacion
+                    </td>
+                    <td width="300">
+                        Descripcion
+                    </td>
+                    <td width="100">
+                        Monto
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="min-width: 590px;">
+            % if object.negociacion_ids:
+                % for negociacion in object.negociacion_ids:
+                    <table>
+                        <tr>
+                            <td width="200">
+                                ${negociacion.tipo_negociacion.name}
+                            </td>
+                            <td width="300">
+                                ${negociacion.descripcion}
+                            </td>
+                            <td width="100">
+                                $ ${negociacion.monto}
+                            </td>
+                        </tr>
+                    </table>
+                % endfor
+            % endif
+        </td>
+    </tr>
+</tbody>
+</table>
+            </field>
+        </record>
+
+        <record id="email_template_correo_aprobacion" model="mail.template">
+            <field name="name">CRM: Correo aprobación de negociación</field>
+            <field name="email_from">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <!--field name="subject">${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})</field-->
+            <field name="subject">Negociación aprobada para la Oportunidad de ${object.name}</field>
+            <field name="email_to">${(object.user_id.email and '&quot;%s&quot; &lt;%s&gt;' % (object.user_id.name, object.user_id.email) or '')|safe}</field>
+            <field name="model_id" ref="crm.model_crm_lead" />
+            <field name="auto_delete" eval="True" />
+            <field name="lang">${object.user_id.lang}</field>
+            <field name="body_html" type="xml">
+<div>
+    <p>
+        Estimado(a) ${object.user_id.name},<br/>
+        Se ha aprobado su solicitud de descuento para la Oportunidad de <strong>${object.name}</strong>.    
     </p>
     <p style="color:#888888">
         % if object.user_id and object.user_id.signature:

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
+from datetime import timedelta
 
 class Lead(models.Model):
     _inherit = 'crm.lead'
@@ -18,7 +20,8 @@ class Lead(models.Model):
     fecha_posible = fields.Date(string='Posible formalización', )
     fecha_reserva = fields.Date(string='Fecha reserva', )
     metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )
-    monto_pago = fields.Monetary(string='Monto', currency_field='company_currency', required=False, readonly=False)  ## required
+    moneda = fields.Many2one("res.currency", string='Moneda Leads', default=lambda self: self.env.ref('base.USD'))
+    monto_pago = fields.Monetary(string='Monto', currency_field='moneda', required=False, readonly=False)  ## required
     numero_comprobante = fields.Char('# Comprobante')
     copia_comprobante = fields.Binary( string="Copia de comprobante", required=False, copy=False, attachment=True)
 
@@ -73,7 +76,8 @@ class Lead(models.Model):
         ('quincenal', 'Quincenal'),
         ('mensual', 'Mensual'),
     ], string='Frecuencia de seguimiento', readonly=False, )
-
+    nivel_seguimiento = fields.Integer('Nivel de seguimiento', default=0)
+    fecha_ultimo_seguimiento = fields.Date(string='Último seguimiento programado', )
 
     negociacion_solicitada = fields.Boolean(string='Solicitar aprobación', help="Bloquear la negociación y solicitar aprobación" )
     negociacion_aprobada = fields.Boolean(string='Negociación aprobada', )
@@ -82,29 +86,22 @@ class Lead(models.Model):
     @api.onchange('negociacion_solicitada')
     def notificar_negociacion(self):
         if self.negociacion_solicitada:
-            values = {
-                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'note': 'Solicitud de aprobación de negociación. ',
-                'res_id': self.ids[0],
-                'res_model_id': self.env['ir.model']._get('crm.lead').id,
-                'user_id': self.user_id.id,
-            }
-            activity = self.env['mail.activity'].sudo().create(values)
-            activity._onchange_activity_type_id()
-
+            email_template = self.env.ref('crm_vivicon.email_template_solicitud_aprobacion', False)
+            email_template.with_context(type='binary',
+                                        default_type='binary').send_mail(
+                                                                self._origin.id,
+                                                                raise_exception=False,
+                                                                force_send=True)  # default_type='binary'
 
     @api.onchange('negociacion_aprobada')
     def notificar_negociacion_aprobada(self):
         if self.negociacion_aprobada:
-            values = {
-                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'note': 'Solicitud de negociación APROBADA. ',
-                'res_id': self.ids[0],
-                'res_model_id': self.env['ir.model']._get('crm.lead').id,
-                'user_id': self.user_id.id,
-            }
-            activity = self.env['mail.activity'].sudo().create(values)
-            activity._onchange_activity_type_id()
+            email_template = self.env.ref('crm_vivicon.email_template_correo_aprobacion', False)
+            email_template.with_context(type='binary',
+                                        default_type='binary').send_mail(
+                                                                self._origin.id,
+                                                                raise_exception=False,
+                                                                force_send=True)  # default_type='binary'
 
     @api.onchange('plazo_decidir', 'interes_disposicion', 'capacidad_economica')
     def on_change_calificacion(self):
@@ -131,25 +128,96 @@ class Lead(models.Model):
     def opor_reserva(self):
         if self.stage_id.sequence < 3 and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
             self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
-
-            values = {
-                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                'note': 'Reserva se completó. ',
-                'res_id': self.ids[0],
-                'res_model_id': self.env['ir.model']._get('crm.lead').id,
-                'user_id': self.user_id.id,
-            }
-            activity = self.env['mail.activity'].sudo().create(values)
-            activity._onchange_activity_type_id()
+            if self._origin:
+                email_template = self.env.ref('crm_vivicon.email_template_correo_reserva', False)
+                email_template.with_context(type='binary',
+                                            default_type='binary').send_mail(
+                                                                    self._origin.id,
+                                                                    raise_exception=False,
+                                                                    force_send=True)  # default_type='binary'
+            else:
+                raise UserError("Debe guardar el registro y volver a editar antes de proceder con la reserva.")
 
     @api.onchange('req_conozca_cliente', 'req_hoja_datos_propiedad', 'req_copia_cedula')
     def on_change_documentos(self):
         if self.req_conozca_cliente and self.req_hoja_datos_propiedad and self.req_copia_cedula:
-            if self.stage_id.sequence < 5:
-                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
+            if self.stage_id.sequence < 4:
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Documentos')], limit=1)
+                email_template = self.env.ref('crm_vivicon.email_template_documentos_cargados', False)
+                email_template.with_context(type='binary',
+                                            default_type='binary').send_mail(
+                                                                    self._origin.id,
+                                                                    raise_exception=False,
+                                                                    force_send=True)  # default_type='binary'
 
     @api.onchange('req_cumple_firma_contrato')
     def on_change_cumple_firma(self):
         if self.req_cumple_firma_contrato:
+            if self.stage_id.sequence < 5:
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
+
+    @api.onchange('req_fecha_formalizacion')
+    def on_change_formalizado(self):
+        if self.req_fecha_formalizacion:
             if self.stage_id.sequence < 6:
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)
+
+    @api.model
+    def _seguimiento_prospectos(self):  # cron
+        leads = self.env['crm.lead'].search(
+            [('stage_id.sequence', '=', 2),
+             #('nivel_seguimiento', '<=', 2)  # we need to confirm if followup is needed for all leads in stage 2
+            ],
+        )
+        leads_model_id = self.env['ir.model']._get('crm.lead').id
+        total_leads = len(leads)
+        current_lead = 0
+        today = fields.Date.context_today(self)
+
+        for lead in leads:
+            current_lead += 1
+
+            # mail.activity only holds pending activities.  When done, they are deleted and created as messages in chatter
+            overdue_activities = self.env['mail.activity'].search(
+                [('res_model_id', '=', leads_model_id),
+                 ('automated','=', True),
+                 ('res_id', '=', lead.id),
+                 ('date_deadline', '<', today)
+                ],
+            )
+            ultimo_seguimiento = lead.fecha_ultimo_seguimiento
+            if overdue_activities:
+                if ultimo_seguimiento != today:  # caso contrario ya lo movimos y enviamos correo, por eso no se debe volver a enviar
+                    lead.fecha_ultimo_seguimiento = today  # mover fecha para que no se genere una nueva si apenas se va a atender la que está pendiente
+                    email_template = self.env.ref('crm_vivicon.email_template_actividad_atrasada', False)
+                    email_template.with_context(type='binary',
+                                                default_type='binary').send_mail(
+                                                                        lead.id,
+                                                                        raise_exception=False,
+                                                                        force_send=True)  # default_type='binary'
+            elif not ultimo_seguimiento or ultimo_seguimiento < today:  # ya hay que programar un nuevo seguimiento
+                if not ultimo_seguimiento:
+                    ultimo_seguimiento = today
+
+                if lead.nivel_seguimiento < 3:
+                    proximo_seguimiento = ultimo_seguimiento + timedelta(days=3)
+                elif lead.frecuencia_seguimiento == 'semanal':
+                    proximo_seguimiento = ultimo_seguimiento + timedelta(days=7)
+                elif lead.frecuencia_seguimiento == 'semanal':
+                    proximo_seguimiento = ultimo_seguimiento + timedelta(days=14)
+                else:
+                    proximo_seguimiento = ultimo_seguimiento + timedelta(days=30)
+
+                lead.nivel_seguimiento += 1
+                lead.fecha_ultimo_seguimiento = proximo_seguimiento
+                values = {
+                    'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+                    'note': 'Solicitud de aprobación de negociación. ',
+                    'res_id': lead.id,
+                    'res_model_id': leads_model_id,
+                    'user_id': lead.user_id.id,
+                    'date_deadline': proximo_seguimiento,
+                    'automated': True,
+                }
+                activity = self.env['mail.activity'].sudo().create(values)
+                activity._onchange_activity_type_id()
