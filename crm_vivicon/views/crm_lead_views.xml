@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//kanban" position="attributes">
                 <attribute name="quick_create">0</attribute>
+                <attribute name="records_draggable">0</attribute>
             </xpath>
         </field>        
     </record>        
@@ -54,14 +55,15 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
+            <button name="action_set_won_rainbowman" position="attributes"/>
+                <attribute name="invisible">True</attribute>
+            </button>
+            <field name="stage_id" position="attributes">
+                <attribute name="options">{'clickable': 0}</attribute>
+            </field>
             <xpath expr="//div[@class='oe_title']" position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
-
-            <xpath expr="//header/field[@name='stage_id']" position="attributes" >
-                <attribute name="attrs">{'readonly':1, 'invisible': ['|', ('active', '=', False), ('type', '=', 'lead')]}</attribute>
-            </xpath> 
-
             <field name="user_id" position="replace">
             </field>        
             <field name="expected_revenue" position="replace">

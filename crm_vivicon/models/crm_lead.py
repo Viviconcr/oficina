@@ -212,7 +212,7 @@ class Lead(models.Model):
                 lead.fecha_ultimo_seguimiento = proximo_seguimiento
                 values = {
                     'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
-                    'note': 'Solicitud de aprobación de negociación. ',
+                    'note': 'Por favor dar seguimiento al cliente. ',
                     'res_id': lead.id,
                     'res_model_id': leads_model_id,
                     'user_id': lead.user_id.id,
