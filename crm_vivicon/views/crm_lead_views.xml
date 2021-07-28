@@ -55,7 +55,7 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
-            <button name="action_set_won_rainbowman" position="attributes"/>
+            <button name="action_set_won_rainbowman" position="attributes">
                 <attribute name="invisible">True</attribute>
             </button>
             <field name="stage_id" position="attributes">
