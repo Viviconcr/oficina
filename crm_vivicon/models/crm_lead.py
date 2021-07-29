@@ -21,7 +21,7 @@ class Lead(models.Model):
     fecha_reserva = fields.Date(string='Fecha reserva', )
     metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )
     moneda = fields.Many2one("res.currency", string='Moneda Leads', default=lambda self: self.env.ref('base.USD'))
-    monto_pago = fields.Monetary(string='Monto', currency_field='moneda', required=False, readonly=False)  ## required
+    monto_pago = fields.Monetary(string='Monto de Reserva', currency_field='moneda', required=False, readonly=False)  ## required
     numero_comprobante = fields.Char('# Comprobante')
     copia_comprobante = fields.Binary( string="Copia de comprobante", required=False, copy=False, attachment=True)
 
