@@ -41,7 +41,7 @@ class Lead(models.Model):
     porcentaje_plazo = fields.Float(string='Porcentaje de Plazo (%)', digits='Product Price')
     porcentaje_interes = fields.Float(string='Porcentaje de Interés (%)', digits='Product Price')
     porcentaje_capacidad_economica = fields.Float(string='Porcentaje de Capacidad económica (%)', digits='Product Price')
-    calificacion = fields.Float(string='Calificacion', digits='Product Price')
+    calificacion = fields.Float(string='Calificación', digits='Product Price')
     plazo_decidir = fields.Selection([
         ('100', 'Inmediata'),
         ('80', 'Menos de 3 meses'),
