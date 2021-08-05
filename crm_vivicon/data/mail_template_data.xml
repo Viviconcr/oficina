@@ -17,8 +17,8 @@
             <field name="body_html" type="html">
 <div>
     <p>
-        Reciban un cordial saludo,<br/>
-        Les informamos que el prospecto <strong> ${object.name}</strong> asignado a <strong> ${object.user_id.name}</strong>  presenta actividades pendientes atrasadas.
+        Reciba un cordial saludo,<br/>
+        Le informamos que el prospecto <strong> ${object.name}</strong> asignado a <strong> ${object.user_id.name}</strong>  presenta actividades pendientes atrasadas.
     </p>
 </div>
             </field>

@@ -21,7 +21,7 @@ class Lead(models.Model):
     fecha_reserva = fields.Date(string='Fecha reserva', )
     metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )
     moneda = fields.Many2one("res.currency", string='Moneda Leads', default=lambda self: self.env.ref('base.USD'))
-    monto_pago = fields.Monetary(string='Monto de Reserva', currency_field='moneda', required=False, readonly=False)  ## required
+    monto_pago = fields.Monetary(string='Monto de reserva', currency_field='moneda', required=False, readonly=False)  ## required
     numero_comprobante = fields.Char('# Comprobante')
     copia_comprobante = fields.Binary( string="Copia de comprobante", required=False, copy=False, attachment=True)
 
@@ -82,6 +82,59 @@ class Lead(models.Model):
     negociacion_solicitada = fields.Boolean(string='Solicitar aprobación', help="Bloquear la negociación y solicitar aprobación" )
     negociacion_aprobada = fields.Boolean(string='Negociación aprobada', )
     negociacion_ids = fields.One2many('negociacion.crm', 'lead_id', 'Negociaciones')
+
+    # duplicados
+    cantidad_similares = fields.Integer(string='Cantidad similares', copy=False, store=True)
+    es_similar_a_otro = fields.Boolean(string='Posible Duplicación', copy=False, default=False,
+                                        help='La oportunidad tiene algunos datos que son similares a otras existentes', )
+    similar_auorizado_por = fields.Many2one(string='Liberado por', copy=False, )
+
+    lead_similares_ids = fields.One2many(comodel_name='crm.lead.similares', 
+                                        inverse_name='lead_id', 
+                                        string='Lead Similares',
+                                        copy=False)
+
+    def write(self, vals):
+        # if len(self) == 1 and self.active and not self.stage_id.is_won:
+        if len(self) == 1 and self.active and self.stage_id.sequence <= 4:
+            leads_similares = []            
+            cantidad = 0
+            if (not self.cantidad_similares or self.cantidad_similares == 0 or (self.cantidad_similares > 0 and not self.similar_auorizado_por)):
+                # No se ha evaluado similares,  o bien tenía similares y no ha sido autorizado
+                leads = self.env['crm.lead'].search([('active','=',True), ('name','like',self.name)])
+                for r in leads:
+                    if r.id != self.id:
+                        vid = None
+                        if r.name == self.name:
+                            vid = r.id                        
+                        
+                        # verifica si tienen correos en comun
+                        if not vid and self.email_from and r.email_from:
+                            l1 = self.email_from.replace(',',';').replace(' ','').upper().split(';')
+                            l2 = r.email_from.replace(',',';').replace(' ','').upper().split(';')
+                            if (set(l1) & set(l2)):
+                                vid = r.id
+                        # verifica si tienen telefonos en comun
+                        if not vid and self.phone and r.phone:
+                            l1 = self.phone.replace(',',';').replace(' ','').upper().split(';')
+                            l2 = r.phone.replace(',',';').replace(' ','').upper().split(';')
+                            if (set(l1) & set(l2)):
+                                vid = r.id
+                        if vid:
+                            leads_similares.append( vid )
+                            cantidad += 1
+                vals['cantidad_similares'] = cantidad
+                vals['es_similar_a_otro'] = True
+            res = super(Lead, self).write(vals)
+            if self.cantidad_similares > 0:
+                self.lead_similares_ids.unlink()
+            if cantidad > 0:
+                for vid in leads_similares:
+                    self.env['crm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
+        else:
+            res = super(Lead, self).write(vals)
+        return res
+
 
     @api.onchange('negociacion_solicitada')
     def notificar_negociacion(self):

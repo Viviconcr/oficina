@@ -64,8 +64,10 @@
             <xpath expr="//div[@class='oe_title']" position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
+
             <field name="user_id" position="replace">
-            </field>        
+            </field>
+
             <field name="expected_revenue" position="replace">
                 <field name="expected_revenue" invisible="1"/>
             </field>        
@@ -81,6 +83,12 @@
                 <field name="metodo_contacto" attrs="{'required': True}"/>
                 <field name="modelo_interes" widget="many2many_tags" options="{'no_create': True}"/>
                 <field name="user_id" string="Asesor" readonly="1"/>
+                <label for="es_similar_a_otro" string="Posible Duplicación" />
+                <div class="d-flex">
+                    <field name="es_similar_a_otro" attrs="{'readonly':1}" />
+                    <span class="o_form_label mx-3">      Similares </span>
+                    <field name="cantidad_similares" attrs="{'readonly': 1}" />
+                </div>
             </xpath>        
 
             <field name="date_deadline" position="replace">
@@ -114,6 +122,18 @@
                         </group>
                     </group>
                 </page>
+                <page string="Leads Similares" name="Leads Similares"  attrs="{'invisible': [('cantidad_similares', '&lt;=', 0)]}" >
+                    <group string="Leads Similares">
+                        <field name="lead_similares_ids" nolabel="1">
+                            <tree create="false" delete="false">
+                                <field name="lead_similar_id" widget="many2one_clickable" options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="nombre" />
+                                <field name="email_from" />
+                                <field name="telefono" />
+                            </tree>
+                        </field>
+                    </group>
+                </page>
                 <page string="Calificación" name="calificacion">
                     <group>
                         <group >
@@ -137,6 +157,7 @@
                         </group>
                         <group >
                             <field name="numero_comprobante"/>
+                            <field name="moneda" invisible="1"/>
                             <field name="monto_pago" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="copia_comprobante"/>
                         </group>
@@ -153,6 +174,7 @@
                             <tree editable="bottom" string="Negociaciones">
                                 <field name="tipo_negociacion"/>
                                 <field name="descripcion"/>
+                                <field name="moneda" invisible="1"/>
                                 <field name="monto"/>
                             </tree>
                         </field>
@@ -218,6 +240,9 @@
         <field name="inherit_id" ref="crm_vivicon.crm_lead_view_form_vivicon"/>
         <field name="groups_id" eval="[(6, 0, [ref('sales_team.group_sale_manager') ])]" />                
         <field name="arch" type="xml">
+            <field name="es_similar_a_otro" position="attributes">
+                <attribute name="readonly">0</attribute>
+            </field>
             <field name="negociacion_aprobada" position="attributes">
                 <attribute name="readonly">0</attribute>                   
             </field>                             
@@ -228,5 +253,4 @@
     </record>
 
 </odoo>
-
 
