@@ -17,6 +17,14 @@ class Lead(models.Model):
         string='Modelos de interés',
         domain=_getCategId, required=True,
         help="Modelos que le interesan al cliente")
+    modelo_seleccionado_id = fields.Many2one(
+        'product.product', 
+        string='Modelo seleccionado',
+        domain=_getCategId, 
+        help="Modelo seleccionado por el cliente") 
+
+    casa_seleccionada_id = fields.Many2one('stock.production.lot', string='Casa seleccionada',
+        help="Casa seleccionada por el cliente")       
     fecha_posible = fields.Date(string='Posible formalización', )
     fecha_reserva = fields.Date(string='Fecha reserva', )
     metodo_pago = fields.Many2one('crm.metodos.pago', string='Método de pago', )

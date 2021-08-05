@@ -154,6 +154,9 @@
                             <field name="fecha_posible"/>
                             <field name="fecha_reserva"/>
                             <field name="metodo_pago"/>
+                            <field name="modelo_seleccionado_id"/>
+                            <field name="casa_seleccionada_id"
+                                domain="[('product_id','in',[modelo_seleccionado_id])]"/>                            
                         </group>
                         <group >
                             <field name="numero_comprobante"/>
