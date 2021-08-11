@@ -6,3 +6,4 @@ from . import negociacion_crm
 from . import crm_metodos_pago
 from . import crm_lead_similares
 from . import res_config_settings
+from . import seguimiento_crm

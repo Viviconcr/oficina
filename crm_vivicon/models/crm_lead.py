@@ -91,6 +91,11 @@ class Lead(models.Model):
     negociacion_aprobada = fields.Boolean(string='Negociación aprobada', )
     negociacion_ids = fields.One2many('negociacion.crm', 'lead_id', 'Negociaciones')
 
+    banco = fields.Char(string = 'Banco')
+    observaciones = fields.Text(string='Observaciones')
+
+    seguimiento_ids = fields.One2many('seguimiento.crm', 'lead_id', 'Detalle')
+        
     # duplicados
     cantidad_similares = fields.Integer(string='Cantidad similares', copy=False, store=True)
     es_similar_a_otro = fields.Boolean(string='Posible Duplicación', copy=False, default=False,

@@ -201,6 +201,22 @@
                         </group>
                     </group>
                 </page>
+                <page string="Seguimiento" name="Seguimiento" attrs="{'invisible': [('stage_id', '&lt;', 4)]}">
+                        <group>
+                            <field name="banco" />
+                        </group>
+                        <group >
+                            <field name="observaciones"  placeholder="Observaciones del seguimiento."/>
+                        </group>
+                    <field name="seguimiento_ids"
+                            widget="section_and_note_one2many"
+                            mode="tree">
+                        <tree editable="bottom" string="Detalle">
+                            <field name="fecha"/>
+                            <field name="detalle"/>
+                        </tree>
+                    </field>
+                </page>               
                 <page string="Formalización" name="formalizacion" attrs="{'invisible': [('stage_id', '&lt;', 5)]}">
                     <group string="Formalización">
                         <group>
