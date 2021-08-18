@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 class Lead(models.Model):
     _inherit = 'crm.lead'
@@ -100,7 +100,7 @@ class Lead(models.Model):
     cantidad_similares = fields.Integer(string='Cantidad similares', copy=False, store=True)
     es_similar_a_otro = fields.Boolean(string='Posible Duplicación', copy=False, default=False,
                                         help='La oportunidad tiene algunos datos que son similares a otras existentes', )
-    similar_auorizado_por = fields.Many2one(string='Liberado por', copy=False, )
+    similar_autorizado_por = fields.Many2one('res.users', string='Liberado por', copy=False, )
 
     lead_similares_ids = fields.One2many(comodel_name='crm.lead.similares', 
                                         inverse_name='lead_id', 
@@ -109,44 +109,65 @@ class Lead(models.Model):
 
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
-        if len(self) == 1 and self.active and self.stage_id.sequence <= 4:
-            leads_similares = []            
-            cantidad = 0
-            if (not self.cantidad_similares or self.cantidad_similares == 0 or (self.cantidad_similares > 0 and not self.similar_auorizado_por)):
-                # No se ha evaluado similares,  o bien tenía similares y no ha sido autorizado
-                leads = self.env['crm.lead'].search([('active','=',True), ('name','like',self.name)])
-                for r in leads:
-                    if r.id != self.id:
-                        vid = None
-                        if r.name == self.name:
-                            vid = r.id                        
-                        
-                        # verifica si tienen correos en comun
-                        if not vid and self.email_from and r.email_from:
-                            l1 = self.email_from.replace(',',';').replace(' ','').upper().split(';')
-                            l2 = r.email_from.replace(',',';').replace(' ','').upper().split(';')
-                            if (set(l1) & set(l2)):
-                                vid = r.id
-                        # verifica si tienen telefonos en comun
-                        if not vid and self.phone and r.phone:
-                            l1 = self.phone.replace(',',';').replace(' ','').upper().split(';')
-                            l2 = r.phone.replace(',',';').replace(' ','').upper().split(';')
-                            if (set(l1) & set(l2)):
-                                vid = r.id
-                        if vid:
-                            leads_similares.append( vid )
-                            cantidad += 1
-                vals['cantidad_similares'] = cantidad
-                vals['es_similar_a_otro'] = True
-            res = super(Lead, self).write(vals)
+        similares = None
+        if len(self) == 1 and self.active: 
+            new_es_similar_a_otro = vals.get('es_similar_a_otro')            
+            if self.es_similar_a_otro and new_es_similar_a_otro != None and not new_es_similar_a_otro:
+                vals.update({'similar_autorizado_por': self.env.uid })
+            elif (self.stage_id.sequence <= 2 
+                    and (not self.cantidad_similares or self.cantidad_similares == 0 or (self.cantidad_similares > 0 and not self.similar_autorizado_por)) ):
+                similares = self.calcula_similares()
+                if similares and similares.get('cantidad_similares') > 0:
+                    vals['cantidad_similares'] = similares.get('cantidad_similares')
+                    vals['es_similar_a_otro'] = True
+                elif self.cantidad_similares > 0:
+                    # No devolvió similares, entonces limpia lo que tenía antes
+                    vals['cantidad_similares'] = 0
+                    vals['es_similar_a_otro'] = False
+
+        res = super(Lead, self).write(vals)
+        if len(self) == 1:
             if self.cantidad_similares > 0:
-                self.lead_similares_ids.unlink()
-            if cantidad > 0:
-                for vid in leads_similares:
+                self.lead_similares_ids.unlink()        
+            if similares and similares.get('cantidad_similares') > 0:
+                for vid in similares.get('leads_similares'):
                     self.env['crm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
-        else:
-            res = super(Lead, self).write(vals)
         return res
+
+
+    def calcula_similares(self):        
+        vals = {}
+        fref = datetime.today() - timedelta(days=365)   # 1 año hacia atras
+        fdesde_str = fref.strftime('%Y-%m-%d')
+        leads_similares = []            
+        cantidad = 0
+        leads = self.env['crm.lead'].search([('active','=',True), ('create_date','>=',fdesde_str)])
+        for r in leads:
+            if r.id != self.id:
+                vid = None
+                l1 = ' '.join(self.name.split())    # divide el nombre en las partes que tiene y luego las uno con solo un espacio
+                l2 = ' '.join(r.name.split())
+                if l1 == l2:
+                    vid = r.id                
+                # verifica si tienen correos en comun
+                if not vid and self.email_from and r.email_from:
+                    l1 = self.email_from.replace(',',';').replace(' ','').upper().split(';')
+                    l2 = r.email_from.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(l1) & set(l2)):
+                        vid = r.id
+                # verifica si tienen telefonos en comun
+                if not vid and self.phone and r.phone:
+                    l1 = self.phone.replace(',',';').replace(' ','').upper().split(';')
+                    l2 = r.phone.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(l1) & set(l2)):
+                        vid = r.id
+                if vid:
+                    leads_similares.append( vid )
+                    cantidad += 1
+        vals['cantidad_similares'] = cantidad
+        vals['es_similar_a_otro'] = True
+        vals['leads_similares'] = leads_similares
+        return vals
 
 
     @api.onchange('negociacion_solicitada')

@@ -10,6 +10,7 @@
                 <attribute name="quick_create">0</attribute>
                 <attribute name="records_draggable">0</attribute>
             </xpath>
+            <progressbar field="activity_state" position="replace"/>
         </field>        
     </record>        
 
@@ -89,6 +90,7 @@
                     <span class="o_form_label mx-3">      Similares </span>
                     <field name="cantidad_similares" attrs="{'readonly': 1}" />
                 </div>
+                <field name="similar_autorizado_por" string="Autoriza Similar" attrs="{'invisible':[('similar_autorizado_por','=',False)]}" />
             </xpath>        
 
             <field name="date_deadline" position="replace">
@@ -130,6 +132,7 @@
                                 <field name="nombre" />
                                 <field name="email_from" />
                                 <field name="telefono" />
+                                <field name="modelo_interes" widget="many2many_tags" />
                             </tree>
                         </field>
                     </group>

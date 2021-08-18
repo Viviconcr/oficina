@@ -12,3 +12,4 @@ class crmLeadSimilares(models.Model):
     nombre = fields.Char(related='lead_similar_id.name', )
     email_from = fields.Char(related='lead_similar_id.email_from', )
     telefono = fields.Char(related='lead_similar_id.mobile', )
+    modelo_interes = fields.Many2many(related='lead_similar_id.modelo_interes', )
