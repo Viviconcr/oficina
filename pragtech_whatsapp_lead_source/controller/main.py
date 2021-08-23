@@ -9,8 +9,9 @@ import phonenumbers
 import datetime
 import time
 import pytz
+import re
 from odoo.tools import ustr
-import requests
+
 import base64
 
 _logger = logging.getLogger(__name__)
@@ -58,7 +59,9 @@ class Whatsapp(http.Controller):
 
     @http.route(['/whatsapp/lead/source'], type='json', auth='public')
     def whatsapp_responce(self):
+        _logger.error('MAB - Entering webhook')
         data = json.loads(request.httprequest.data)
+        _logger.error('MAB - webhook json: %s', data)
         if 'messages' in data and data['messages']:
             msg_list = []
             msg_dict = {}
@@ -66,43 +69,45 @@ class Whatsapp(http.Controller):
             crm_lead_id = ''
 
             for msg in data['messages']:
+                _logger.error('MAB - webhook msg: %s', msg)
+                chat_id = msg.get('chatId')
+                phone = "+" + re.split('[-@]', chat_id)[0]
+                sender = str(msg.get('senderName', 'Cliente'))
+                
                 if msg.get('fromMe'):
-                    crm_lead_id = crm_lead_obj.sudo().search([('chat_id', '=', msg['chatId'])], limit=1)
+                    crm_lead_id = crm_lead_obj.sudo().search(['|', '|', ('phone', '=', phone), ('mobile', '=', phone), ('chat_id', '=', chat_id)], limit=1)
                     if crm_lead_id:
-                        if crm_lead_id.description:
-                            crm_lead_id.description += "\nOwner: " + str(msg.get('body'))
-                        else:
-                            crm_lead_id.description = "Owner: " + str(msg.get('body'))
-
-                if 'chatId' in msg and msg['chatId'] and not msg.get('fromMe'):
-                    crm_lead_id = crm_lead_obj.sudo().search([('chat_id', '=', msg['chatId'])], limit=1)
-                    if crm_lead_id:
-                        if crm_lead_id.stage_id.name == 'Won':
-                            source_id = request.env.ref('pragtech_whatsapp_lead_source.utm_source_whatsapp')
-                            medium_id = request.env.ref('pragtech_whatsapp_lead_source.utm_medium_whatsapp')
-                            crm_lead_id = crm_lead_obj.sudo().create({
-                                'name': msg.get('chatId'),
-                                'chat_id': msg.get('chatId'),
-                                'type': 'lead',
-                                'medium_id': medium_id.id,
-                                'source_id': source_id.id,
-                            })
-                            crm_lead_id.description = "Customer: " + str(msg.get('body'))
-                        else:
-                            if crm_lead_id.description:
-                                crm_lead_id.description += "\nCustomer: " + str(msg.get('body'))
-                            else:
-                                crm_lead_id.description = "Customer: " + str(msg.get('body'))
-                    else:
+                        sender = request.env.user.name
+                        crm_lead_id.message_post(
+                                         body= sender + ": " + str(msg.get('body')),
+                                         subject= sender,
+                                         message_type= 'notification',
+                                         parent_id= False,
+                        )
+                elif 'chatId' in msg and msg['chatId'] and not msg.get('fromMe'):
+                    parsed_phone = phonenumbers.parse(phone, 'CR')
+                    parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)
+                    crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
+                                                                   '|', '|', ('chat_id', '=', chat_id), ('phone', '=', parsed_phone), 
+                                                                        ('mobile', '=', parsed_phone)], limit=1)
+                    if not crm_lead_id:
                         source_id = request.env.ref('pragtech_whatsapp_lead_source.utm_source_whatsapp')
                         medium_id = request.env.ref('pragtech_whatsapp_lead_source.utm_medium_whatsapp')
+
                         crm_lead_id = crm_lead_obj.sudo().create({
                             'name': msg.get('chatId'),
-                            'chat_id': msg.get('chatId'),
-                            'type': 'lead',
+                            'phone': parsed_phone,
+                            'chat_id': chat_id,
+                            'type': 'opportunity',
                             'medium_id': medium_id.id,
                             'source_id': source_id.id,
                         })
-                        crm_lead_id.description = "Customer: " + str(msg.get('body'))
-
+                        #crm_lead_id.description = "Customer: " + str(msg.get('body'))
+                    crm_lead_id.message_post(
+                                     body= sender + ": " + str(msg.get('body')),
+                                     subject= sender,
+                                     message_type= 'notification',
+                                     parent_id= False,
+                    )
+                    #_logger.error('MAB - update lead description v2: %s', crm_lead_id.description)
         return 'OK'

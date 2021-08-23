@@ -4,6 +4,7 @@ import datetime
 from odoo.exceptions import UserError
 from odoo import api, fields, models, _ , tools
 import logging
+import phonenumbers
 _logger = logging.getLogger(__name__)
 
 
@@ -39,6 +40,12 @@ class SendWAMessageMarketing(models.TransientModel):
         status_url = param.get('whatsapp_endpoint_for_lead') + '/status?token=' + param.get('whatsapp_token_for_lead')
         status_response = requests.get(status_url)
         json_response_status = json.loads(status_response.text)
+
+        parsed_phone = phonenumbers.parse(rec.phone, 'CR')
+        _logger.error("MAB - \n Parsed phone: %s", parsed_phone)
+        parsed_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
+        sender = self.env.user.name
+        
         if (status_response.status_code == 200 or status_response.status_code == 201) and json_response_status[
             'accountStatus'] == 'authenticated':
             if active_model == 'crm.lead':
@@ -46,12 +53,25 @@ class SendWAMessageMarketing(models.TransientModel):
                 headers = {
                     "Content-Type": "application/json",
                 }
-                tmp_dict = {
-                    "chatId": str(rec.chat_id) ,
-                    "body": self.message}
+                if rec.chat_id:
+                    tmp_dict = {
+                        "chatId": str(rec.chat_id),
+                        "body": self.message}
+                else:
+                    tmp_dict = {
+                        "phone": parsed_phone,
+                        "body": self.message}
+
                 response = requests.post(url, json.dumps(tmp_dict), headers=headers)
                 if response.status_code == 201 or response.status_code == 200:
-                    _logger.info("\nSend Message to contact successfully")
+                    rec.message_post(
+                        body= sender + ": " + self.message,
+                        subject= sender,
+                        message_type= 'notification',
+                        parent_id= False,
+                        attachments=self.attachment_ids,
+                    )
+                    _logger.error("MAB - \nSend Message to contact successfully \n dict: %s", tmp_dict)
                 if self.attachment_ids:
                     for attachment in self.attachment_ids:
                         with open("/tmp/" + attachment.name, 'wb') as tmp:
@@ -61,11 +81,19 @@ class SendWAMessageMarketing(models.TransientModel):
                             headers_send_file = {
                                 "Content-Type": "application/json",
                             }
-                            dict_send_file = {
-                                "chatId": str(rec.chat_id),
-                                "body": "data:" + attachment.mimetype + ";base64," + encoded_file[2:-1],
-                                "filename": attachment.name
-                            }
+                            if rec.chat_id:
+                                dict_send_file = {
+                                    "chatId": str(rec.chat_id),
+                                    "body": "data:" + attachment.mimetype + ";base64," + encoded_file[2:-1],
+                                    "filename": attachment.name
+                                }
+                            else:
+                                dict_send_file = {
+                                    "phone": parsed_phone,
+                                    "body": "data:" + attachment.mimetype + ";base64," + encoded_file[2:-1],
+                                    "filename": attachment.name
+                                }
+
                             response_send_file = requests.post(url_send_file, json.dumps(dict_send_file),
                                                                headers=headers_send_file)
                             if response_send_file.status_code == 201 or response_send_file.status_code == 200:
