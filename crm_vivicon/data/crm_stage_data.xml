@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo noupdate="0">
     <record model="crm.stage" id="crm.stage_lead2">
         <field name="name">Contacto</field>
         <field name="sequence">1</field>
@@ -14,8 +14,6 @@
     </record>
     <record model="crm.stage" id="crm_vivicon.stage_lead4b">
         <field name="name">Oport.Documentos</field>
-        <field name="fold" eval="False"/>
-        <field name="is_won">True</field>
         <field name="sequence">4</field>
     </record>
     <record model="crm.stage" id="crm_vivicon.stage_lead5">
@@ -31,6 +29,7 @@
     <record model="crm.stage" id="crm_vivicon.stage_lead7">
         <field name="name">Oport.Retiros</field>
         <field name="fold" eval="True"/>
+        <field name="is_won">True</field>
         <field name="sequence">7</field>
     </record>
 </odoo>
