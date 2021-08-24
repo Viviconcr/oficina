@@ -86,7 +86,7 @@ class Whatsapp(http.Controller):
                         )
                 elif 'chatId' in msg and msg['chatId'] and not msg.get('fromMe'):
                     parsed_phone = phonenumbers.parse(phone, 'CR')
-                    parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)
+                    parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
                     crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
                                                                    '|', '|', ('chat_id', '=', chat_id), ('phone', '=', parsed_phone), 
                                                                         ('mobile', '=', parsed_phone)], limit=1)

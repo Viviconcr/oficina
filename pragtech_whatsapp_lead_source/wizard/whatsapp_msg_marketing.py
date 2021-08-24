@@ -64,14 +64,14 @@ class SendWAMessageMarketing(models.TransientModel):
 
                 response = requests.post(url, json.dumps(tmp_dict), headers=headers)
                 if response.status_code == 201 or response.status_code == 200:
-                    rec.message_post(
-                        body= sender + ": " + self.message,
-                        subject= sender,
-                        message_type= 'notification',
-                        parent_id= False,
-                        attachments=self.attachment_ids,
-                    )
-                    _logger.error("MAB - \nSend Message to contact successfully \n dict: %s", tmp_dict)
+                    #rec.message_post(
+                    #    body= sender + ": " + self.message,
+                    #    subject= sender,
+                    #    message_type= 'notification',
+                    #    parent_id= False,
+                    #    attachments=self.attachment_ids,
+                    #)
+                    _logger.error("\nSend Message to contact successfully \n dict: %s", tmp_dict)
                 if self.attachment_ids:
                     for attachment in self.attachment_ids:
                         with open("/tmp/" + attachment.name, 'wb') as tmp:
@@ -97,7 +97,7 @@ class SendWAMessageMarketing(models.TransientModel):
                             response_send_file = requests.post(url_send_file, json.dumps(dict_send_file),
                                                                headers=headers_send_file)
                             if response_send_file.status_code == 201 or response_send_file.status_code == 200:
-                                _logger.info("\nSend file attachment successfully11")
+                                _logger.info("\nSend file attachment successfully!!")
 
         else:
             raise UserError(_('Please authorize your mobile number with chat api'))
