@@ -109,7 +109,7 @@ class Lead(models.Model):
                                         string='Lead Similares',
                                         copy=False)
 
-    def write(self, vals):
+    def xxwrite(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
         similares = None
         if len(self) == 1 and self.active: 
