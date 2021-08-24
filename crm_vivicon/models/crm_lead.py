@@ -4,6 +4,8 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 from datetime import timedelta, datetime
+import logging
+_logger = logging.getLogger(__name__)
 
 class Lead(models.Model):
     _inherit = 'crm.lead'
@@ -214,7 +216,9 @@ class Lead(models.Model):
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
     def opor_reserva(self):
         if self.stage_id.sequence < 3 and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
-            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
+            new_stage = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
+            _logger.error('VIVICON - stage_id: %s', new_stage)
+            self.stage_id = new_stage
             if self._origin:
                 email_template = self.env.ref('crm_vivicon.email_template_correo_reserva', False)
                 email_template.with_context(type='binary',
