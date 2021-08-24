@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+import functools
+import traceback
+import sys
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
@@ -6,6 +10,27 @@ from odoo.exceptions import UserError, ValidationError
 from datetime import timedelta, datetime
 import logging
 _logger = logging.getLogger(__name__)
+
+
+"""
+"""
+
+INDENT = 4*' '
+
+def stacktrace(func):
+    @functools.wraps(func)
+    def wrapped(*args, **kwds):
+        # Get all but last line returned by traceback.format_stack()
+        # which is the line below.
+        callstack = '\n'.join([INDENT+line.strip() for line in traceback.format_stack()][:-1])
+        _logger.error('PROINTEC - {}() called:'.format(func.__name__))
+        _logger.error(callstack)
+        return func(*args, **kwds)
+
+    return wrapped
+"""
+"""
+
 
 class Lead(models.Model):
     _inherit = 'crm.lead'
@@ -109,7 +134,8 @@ class Lead(models.Model):
                                         string='Lead Similares',
                                         copy=False)
 
-    def xxwrite(self, vals):
+    @stacktrace
+    def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
         similares = None
         if len(self) == 1 and self.active: 
@@ -137,6 +163,7 @@ class Lead(models.Model):
         return res
 
 
+    @stacktrace
     def calcula_similares(self):        
         vals = {}
         fref = datetime.today() - timedelta(days=365)   # 1 año hacia atras
@@ -172,6 +199,7 @@ class Lead(models.Model):
         return vals
 
 
+    @stacktrace
     @api.onchange('negociacion_solicitada')
     def notificar_negociacion(self):
         if self.negociacion_solicitada:
@@ -182,6 +210,7 @@ class Lead(models.Model):
                                                                 raise_exception=False,
                                                                 force_send=True)  # default_type='binary'
 
+    @stacktrace
     @api.onchange('negociacion_aprobada')
     def notificar_negociacion_aprobada(self):
         if self.negociacion_aprobada:
@@ -192,6 +221,7 @@ class Lead(models.Model):
                                                                 raise_exception=False,
                                                                 force_send=True)  # default_type='binary'
 
+    @stacktrace
     @api.onchange('plazo_decidir', 'interes_disposicion', 'capacidad_economica')
     def on_change_calificacion(self):
         total = 0
@@ -208,11 +238,13 @@ class Lead(models.Model):
         else:
             self.frecuencia_seguimiento = 'semanal'
 
+    @stacktrace
     @api.onchange('user_id')
     def on_change_asesor(self):
         if self.stage_id.sequence < 2:
             self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
+    @stacktrace
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
     def opor_reserva(self):
         if self.stage_id.sequence < 3 and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
@@ -229,6 +261,7 @@ class Lead(models.Model):
             else:
                 raise UserError("Debe guardar el registro y volver a editar antes de proceder con la reserva.")
 
+    @stacktrace
     @api.onchange('req_conozca_cliente', 'req_hoja_datos_propiedad', 'req_copia_cedula')
     def on_change_documentos(self):
         if self.req_conozca_cliente and self.req_hoja_datos_propiedad and self.req_copia_cedula:
@@ -241,18 +274,21 @@ class Lead(models.Model):
                                                                     raise_exception=False,
                                                                     force_send=True)  # default_type='binary'
 
+    @stacktrace
     @api.onchange('req_cumple_firma_contrato')
     def on_change_cumple_firma(self):
         if self.req_cumple_firma_contrato:
             if self.stage_id.sequence < 5:
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
 
+    @stacktrace
     @api.onchange('req_fecha_formalizacion')
     def on_change_formalizado(self):
         if self.req_fecha_formalizacion:
             if self.stage_id.sequence < 6:
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)
 
+    @stacktrace
     @api.model
     def _seguimiento_prospectos(self):  # cron
         leads = self.env['crm.lead'].search(

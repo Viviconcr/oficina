@@ -18,7 +18,6 @@
         'data/mail_template_data.xml',
         'data/ir_cron_data.xml',
         'views/stock_production_lot_views.xml',
-        'views/res_config_settings_views.xml',
         'views/crm_metodos_pago_views.xml',
         'views/crm_lead_views.xml',
         'views/menu_views.xml',

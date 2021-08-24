@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="0">
-        <record id="group_aprobar_negociaciones" model="res.groups">
-            <field name="name">Puede aprobar negociaciones</field>
-            <field name="category_id" ref="base.module_category_hidden"/>
-        </record>
-
         <record id="crm_vivicon.product_category_proyectos_crm" model="product.category">
             <field name="parent_id" ref="product.product_category_1"/>
             <field name="name">Proyectos Constructivos</field>
