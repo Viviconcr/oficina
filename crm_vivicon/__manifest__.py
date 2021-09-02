@@ -20,6 +20,7 @@
         'views/stock_production_lot_views.xml',
         'views/crm_metodos_pago_views.xml',
         'views/crm_lead_views.xml',
+        'views/crm_projects_views.xml',
         'views/menu_views.xml',
         'security/ir.model.access.csv',
     ],
