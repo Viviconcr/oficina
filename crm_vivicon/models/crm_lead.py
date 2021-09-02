@@ -175,7 +175,7 @@ class Lead(models.Model):
                 self.lead_similares_ids.unlink()        
             if similares and similares.get('cantidad_similares') > 0:
                 for vid in similares.get('leads_similares'):
-                    self.env['crm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
+                    self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
         return res
 
 
