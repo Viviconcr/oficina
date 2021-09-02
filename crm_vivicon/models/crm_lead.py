@@ -149,7 +149,6 @@ class Lead(models.Model):
     crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
 
-
     #@stacktrace
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
