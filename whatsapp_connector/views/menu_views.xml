@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_whatsapp_config" name="Whatsapp Config" parent="base.menu_administration" sequence="10" 
+                action="action_xwhatsapp_account" groups="base.group_no_one" />
+    </data>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+         <record id="xwhatsapp_crm_lead_form" model="ir.ui.view">
+            <field name="name">xwhatsapp_crm_lead_form</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_set_lost']" position="after">
+                    <button string=" Enviar Whatsapp" type="object" name="action_send_whatsapp_msg" class="fa fa-whatsapp" />                        
+                </xpath>
+                <xpath expr="//field[@name='team_id']" position="after">
+                     <field name="x_chat_id" readonly="1" force_save="1"/>
+                </xpath>
+            </field>
+         </record>
+    </data>
+</odoo>

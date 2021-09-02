@@ -2,5 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 negociacion_crm,access.negociacion.crm,model_negociacion_crm,sales_team.group_sale_salesman,1,1,1,0
 crm_metodos_pago,access.crm.metodos.pago,model_crm_metodos_pago,sales_team.group_sale_manager,1,1,1,0
 crm_metodos_pago,access.crm.metodos.pago,model_crm_metodos_pago,sales_team.group_sale_salesman,1,0,0,0
-crm_lead_similares,access.crm.lead.similares,model_crm_lead_similares,sales_team.group_sale_salesman,1,1,1,0
+xcrm_lead_similares,access.xcrm.lead.similares,model_xcrm_lead_similares,sales_team.group_sale_salesman,1,1,1,0
+xcrm_projects,access.xcrm.projects,model_xcrm_projects,sales_team.group_sale_manager,1,1,1,0
 seguimiento_crm,access.seguimiento.crm,model_seguimiento_crm,sales_team.group_sale_salesman,1,1,1,0

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 
-class crmLeadSimilares(models.Model):
-    _name = "crm.lead.similares"
+class xCrmLeadSimilares(models.Model):
+    _name = "xcrm.lead.similares"
     _description = 'Lead que tienen datos similares'
 
     lead_id = fields.Many2one(comodel_name='crm.lead', required=True,

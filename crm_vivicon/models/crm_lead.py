@@ -140,11 +140,15 @@ class Lead(models.Model):
                                         help='La oportunidad tiene algunos datos que son similares a otras existentes', )
     similar_autorizado_por = fields.Many2one('res.users', string='Liberado por', copy=False, )
 
-    lead_similares_ids = fields.One2many(comodel_name='crm.lead.similares', 
+    lead_similares_ids = fields.One2many(comodel_name='xcrm.lead.similares', 
                                         inverse_name='lead_id', 
                                         string='Lead Similares',
                                         copy=False)
     stage_id = fields.Many2one(inverse=_inverseStage)
+
+    crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
+    other_phone = fields.Char(string='Otros Teléfonos', copy=False)
+
 
     #@stacktrace
     def write(self, vals):

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xwhatsapp.account,xwhatsapp.account,model_xwhatsapp_account,base.group_user,1,1,1,1
+access_xwhatsapp_scan_qr_source,xwhatsapp.scan.qr.source,model_xwhatsapp_scan_qr_source,base.group_user,1,1,1,1
+access_xwhatsapp_msg_source,xwhatsapp.msg.source,model_xwhatsapp_msg_source,base.group_user,1,1,1,1

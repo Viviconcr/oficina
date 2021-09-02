@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="xwhatsap_account_filter" model="ir.ui.view">
+            <field name="name">xwhatsap.account.search</field>
+            <field name="model">xwhatsapp.account</field>
+            <field name="arch" type="xml">
+                <search string="Whatsapp account">
+                    <field name="name"/>
+                    <field name="active"/>
+                    <separator/>
+                    <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                </search>                
+            </field>
+        </record>
+
+        <record id="xwhatsap_account_view_tree" model="ir.ui.view">
+            <field name="name">xwhatsapp.account.view.tree</field>
+            <field name="model">xwhatsapp.account</field>
+            <field name="arch" type="xml">
+                <tree string="Cuentas de Whatsapp">
+                    <field name="name" string="Nombre"/>
+                    <field name="phone"/>
+                    <field name="whatsapp_endpoint"/>
+                    <field name="whatsapp_token" password="True"/>
+                    <field name="active" widget="boolean_toggle" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="xwhatsapp_account_view_form" model="ir.ui.view">
+            <field name="name">xwhatsapp.account.view.form</field>
+            <field name="model">xwhatsapp.account</field>
+            <field name="arch" type="xml">
+                <form string="Cuentas de Whatsapp">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="whatsapp_authenticate" invisible="1"/>
+                                <field name="name" string="Nombre"/>
+                                <field name="phone" string="Phone" widget="phone" options="{'enable_sms': false}"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle" />
+                            </group>
+                        </group>
+                        <group>
+                            <field name="whatsapp_endpoint"/>
+                            <field name="whatsapp_token" password="True"/>
+                        </group>
+                        <group>
+                            <div class="col-lg-6 col-12 o_setting_box" attrs="{'invisible': [('whatsapp_authenticate','!=',False)]}">
+                                <button string="Get QR Code" type="object" class="oe_highlight" name="action_get_qr_code_source"
+                                        attrs="{'invisible':['|',('whatsapp_authenticate','=',True), ('whatsapp_endpoint','=',False)]}"/>
+                            </div>
+                        </group>
+                        <group>
+                            <div class="col-lg-6 col-12 o_setting_box" attrs="{'invisible': [('whatsapp_authenticate','=',False)]}">
+                                <button string="Logout" type="object" class="oe_highlight" name="action_logout_from_whatsapp_source"
+                                        attrs="{'visible': [('whatsapp_authenticate','=',True)]}"/>
+                                <div class="text-muted">
+                                    Esto tomará cerca de 2 minutos para desconectar la cuenta de whatsapp del api
+                                </div>
+                            </div>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_xwhatsapp_account" model="ir.actions.act_window">
+            <field name="name">Cuentas de Whatsapp</field>
+            <field name="res_model">xwhatsapp.account</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>

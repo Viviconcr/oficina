@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <menuitem id="xcrm_projects_menu" name="Proyectos" parent="crm.crm_menu_config" sequence="2"
+                action="action_xcrm_projects"/>
         <menuitem id="crm_metodos_pago_menu" name="Métodos de Pago" parent="crm.crm_menu_config" sequence="6"
                 action="action_crm_metodos_pago"/>
     </data>
