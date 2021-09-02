@@ -71,16 +71,27 @@ class Whatsapp(http.Controller):
             for msg in data['messages']:
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: msg: %s', msg)
                 chat_id = msg.get('chatId')
-                phone = "+" + re.split('[-@]', chat_id)[0]
+                phone = "+" + re.split('[-@]', chat_id)[0]                
                 sender = str(msg.get('senderName', 'Cliente'))
+                instance_id = msg.get('instanceId')
+                # if instance_id:
+                #     waccount_id = self.env['xwhatsapp.account'].search([('instance_id','=', instance_id )], limit=1)
+                # else:
+                #     waccount_id = None
+
+                # if not waccount_id:
+                #     _logger.info('>> whatsapp_integration.whatsapp_lead_response: No está registrada una cuenta de Whatsapp con instance_id : %s', instance_id )
+                #     continue
                 
+                #  from_uime = time.mktime( waccount_id.fecha_desde_carga_inicial.timetuple() )
+
                 if msg.get('fromMe'):
                     if not ("`" in msg.get('body')[:4]):
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es de FromMe: %s', msg.get('body'))
                         # el mensaje no generado por por el CRM, sino que fue ingresado directamente en el Whatsapp del teléfono
                         # TODO: Considerar si nay lead con igual numero o celular
                         crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
-                                                                       '|', '|', ('phone', '=', phone), ('mobile', '=', phone), ('chat_id', '=', chat_id)], limit=1)
+                                                                       '|', '|', ('phone', '=', phone), ('mobile', '=', phone), ('x_chat_id', '=', chat_id)], limit=1)
                         if crm_lead_id:
                             sender = request.env.user.name
                             crm_lead_id.message_post(
