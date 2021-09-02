@@ -41,7 +41,7 @@
                 <field name="priority" invisible="1"/>
             </field>        
             <field name="name" position="attributes">
-                <attribute name="string">Nombre</attribute>
+                <attribute name="string">Nombre Completo</attribute>
             </field>
             <field name="phone" position="after">
                 <field name="modelo_interes" widget="many2many_tags" options="{'no_create': True}"/>
@@ -78,7 +78,7 @@
             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="replace">
                 <field name="partner_id" invisible="1"/>
                 <h2>Prospecto</h2>
-                <field name="name" string="Nombre"/>
+                <field name="name" string="Nombre Completo"/>
             </xpath>
 
             <xpath expr="//group[@name='opportunity_partner']/label[@for='phone']" position="replace">
