@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
         <record id="crm_vivicon.product_category_proyectos_crm" model="product.category">
             <field name="parent_id" ref="product.product_category_1"/>
             <field name="name">Proyectos Constructivos</field>

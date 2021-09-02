@@ -154,12 +154,12 @@
 <!--attrs="{'invisible': ['|',('stage_id', '=', 1),('stage_id', '=', 2)]}"-->
                     <group name="reserva_general">
                         <group >
-                            <field name="fecha_posible"/>
-                            <field name="fecha_reserva"/>
-                            <field name="metodo_pago"/>
+                            <field name="fecha_posible" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
+                            <field name="fecha_reserva" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
+                            <field name="metodo_pago" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="modelo_seleccionado_id"/>
                             <field name="casa_seleccionada_id"
-                                domain="[('product_id','in',[modelo_seleccionado_id])]"/>                            
+                                domain="[('product_id','in',[modelo_seleccionado_id])]" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>                            
                         </group>
                         <group >
                             <field name="numero_comprobante"/>

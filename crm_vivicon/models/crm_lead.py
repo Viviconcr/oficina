@@ -11,10 +11,7 @@ from datetime import timedelta, datetime
 import logging
 _logger = logging.getLogger(__name__)
 
-
 """
-"""
-
 INDENT = 4*' '
 
 def stacktrace(func):
@@ -29,8 +26,6 @@ def stacktrace(func):
 
     return wrapped
 """
-"""
-
 
 class Lead(models.Model):
     _inherit = 'crm.lead'
@@ -38,6 +33,22 @@ class Lead(models.Model):
     @api.model
     def _getCategId(self):
         return [('categ_id', '=', self.env.ref('crm_vivicon.product_category_proyectos_crm').id)]
+
+    def _inverseStage(self):
+        if self.stage_id.name == 'Oport.Reserva':
+            email_template = self.env.ref('crm_vivicon.email_template_correo_reserva', False)
+            email_template.with_context(type='binary',
+                                        default_type='binary').send_mail(
+                                                                self.id,
+                                                                raise_exception=False,
+                                                                force_send=True)  # default_type='binary'
+        elif self.stage_id.name == 'Oport.Documentos':
+            email_template = self.env.ref('crm_vivicon.email_template_documentos_cargados', False)
+            email_template.with_context(type='binary',
+                                        default_type='binary').send_mail(
+                                                                self.id,
+                                                                raise_exception=False,
+                                                                force_send=True)  # default_type='binary'
 
     modelo_interes = fields.Many2many(
         'product.product', 'crm_modelo_interes_rel', 'lead_id', 'tag_id',
@@ -133,8 +144,9 @@ class Lead(models.Model):
                                         inverse_name='lead_id', 
                                         string='Lead Similares',
                                         copy=False)
+    stage_id = fields.Many2one(inverse=_inverseStage)
 
-    @stacktrace
+    #@stacktrace
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
         similares = None
@@ -163,7 +175,7 @@ class Lead(models.Model):
         return res
 
 
-    @stacktrace
+    #@stacktrace
     def calcula_similares(self):        
         vals = {}
         fref = datetime.today() - timedelta(days=365)   # 1 año hacia atras
@@ -199,7 +211,7 @@ class Lead(models.Model):
         return vals
 
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('negociacion_solicitada')
     def notificar_negociacion(self):
         if self.negociacion_solicitada:
@@ -210,7 +222,7 @@ class Lead(models.Model):
                                                                 raise_exception=False,
                                                                 force_send=True)  # default_type='binary'
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('negociacion_aprobada')
     def notificar_negociacion_aprobada(self):
         if self.negociacion_aprobada:
@@ -221,7 +233,7 @@ class Lead(models.Model):
                                                                 raise_exception=False,
                                                                 force_send=True)  # default_type='binary'
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('plazo_decidir', 'interes_disposicion', 'capacidad_economica')
     def on_change_calificacion(self):
         total = 0
@@ -238,57 +250,37 @@ class Lead(models.Model):
         else:
             self.frecuencia_seguimiento = 'semanal'
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('user_id')
     def on_change_asesor(self):
         if self.stage_id.sequence < 2:
             self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
     def opor_reserva(self):
         if self.stage_id.sequence < 3 and self.fecha_reserva and self.metodo_pago and self.numero_comprobante and self.monto_pago:
-            new_stage = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
-            _logger.error('VIVICON - stage_id: %s', new_stage)
-            self.stage_id = new_stage
-            if self._origin:
-                email_template = self.env.ref('crm_vivicon.email_template_correo_reserva', False)
-                email_template.with_context(type='binary',
-                                            default_type='binary').send_mail(
-                                                                    self._origin.id,
-                                                                    raise_exception=False,
-                                                                    force_send=True)  # default_type='binary'
-            else:
-                raise UserError("Debe guardar el registro y volver a editar antes de proceder con la reserva.")
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Reserva')], limit=1)
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('req_conozca_cliente', 'req_hoja_datos_propiedad', 'req_copia_cedula')
     def on_change_documentos(self):
-        if self.req_conozca_cliente and self.req_hoja_datos_propiedad and self.req_copia_cedula:
-            if self.stage_id.sequence < 4:
-                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Documentos')], limit=1)
-                email_template = self.env.ref('crm_vivicon.email_template_documentos_cargados', False)
-                email_template.with_context(type='binary',
-                                            default_type='binary').send_mail(
-                                                                    self._origin.id,
-                                                                    raise_exception=False,
-                                                                    force_send=True)  # default_type='binary'
+        if self.stage_id.sequence < 4 and self.req_conozca_cliente and self.req_hoja_datos_propiedad and self.req_copia_cedula:
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Oport.Documentos')], limit=1)
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('req_cumple_firma_contrato')
     def on_change_cumple_firma(self):
-        if self.req_cumple_firma_contrato:
-            if self.stage_id.sequence < 5:
-                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
+        if self.stage_id.sequence < 5 and self.req_cumple_firma_contrato:
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Reserva Completa')], limit=1)
 
-    @stacktrace
+    #@stacktrace
     @api.onchange('req_fecha_formalizacion')
     def on_change_formalizado(self):
-        if self.req_fecha_formalizacion:
-            if self.stage_id.sequence < 6:
-                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)
+        if self.stage_id.sequence < 6 and self.req_fecha_formalizacion:
+            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Formalización')], limit=1)
 
-    @stacktrace
+    #@stacktrace
     @api.model
     def _seguimiento_prospectos(self):  # cron
         leads = self.env['crm.lead'].search(

@@ -3,7 +3,7 @@
 
     <!-- Mail template are declared in a NOUPDATE block
          so users can freely customize/delete them -->
-    <data noupdate="0">
+    <data noupdate="1">
         <!--Email template -->
         <record id="email_template_actividad_atrasada" model="mail.template">
             <field name="name">CRM: Actividad atrasada</field>
