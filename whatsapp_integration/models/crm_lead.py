@@ -14,7 +14,7 @@ class CRMLead(models.Model):
  
 
     def whatsapp_get_param(self):
-        param = {'whatsapp_account_id': self.crm_project_id.whatsapp_account_id }
+        param = {'whatsapp_account_id': self.crm_project_id.whatsapp_account_id.id }
         param.update({'whatsapp_dest_phone': self.phone, 'whatsapp_chat_id': self.x_chat_id})
         return param
     

@@ -51,12 +51,12 @@ class SendWAMessageMarketing(models.TransientModel):
         elif not dest_phone:
             raise UserError('action_send_msg: No recibió la variable de contexto "whatsapp_dest_phone" ')
 
-        _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
         waccount = self.env['xwhatsapp.account'].browse(waccount_id)
 
-        _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))        
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))        
         status_url = waccount.whatsapp_endpoint + '/status?token=' + waccount.whatsapp_token
-        _logger.info('>> whatsapp_send_msg.action_send_msg: account %s,  URL: %s', str(waccount), status_url)
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: account %s,  URL: %s', str(waccount), status_url)
     
         status_response = requests.get(status_url)
         json_response_status = json.loads(status_response.text)
