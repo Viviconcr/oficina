@@ -73,7 +73,7 @@ class Whatsapp(http.Controller):
 
             if not waccount_id:
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: No está registrada una cuenta de Whatsapp con instance_id : %s', instance_id )
-                continue
+                return
 
             carga_inicial_desde_utime = time.mktime(waccount_id.fecha_desde_carga_inicial.timetuple())
 
