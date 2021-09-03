@@ -53,7 +53,7 @@ class Lead(models.Model):
     modelo_interes = fields.Many2many(
         'product.product', 'crm_modelo_interes_rel', 'lead_id', 'tag_id',
         string='Modelos de interés',
-        domain=_getCategId, required=True,
+        domain=_getCategId, required=False,
         help="Modelos que le interesan al cliente")
     modelo_seleccionado_id = fields.Many2one(
         'product.product', 
