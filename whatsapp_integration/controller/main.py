@@ -105,7 +105,7 @@ class Whatsapp(http.Controller):
                     parsed_phone = phonenumbers.parse(phone, 'CR')
                     parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
                     crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
-                                                                   '|', '|', ('phone', '=', parsed_phone), ('mobile', '=', parsed_phone), ('chat_id', '=', chat_id)], limit=1)
+                                                                   '|', '|', ('phone', '=', parsed_phone), ('mobile', '=', parsed_phone), ('x_chat_id', '=', chat_id)], limit=1)
                     if not crm_lead_id:
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es NO es de FromMe y Debe crar un nuevo lead')
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
@@ -113,7 +113,7 @@ class Whatsapp(http.Controller):
                         crm_lead_id = crm_lead_obj.sudo().create({
                                                                 'name': msg.get('chatId'),
                                                                 'phone': parsed_phone,
-                                                                'chat_id': chat_id,
+                                                                'x_chat_id': chat_id,
                                                                 'type': 'opportunity',
                                                                 'medium_id': medium_id.id,
                                                                 'source_id': source_id.id,
