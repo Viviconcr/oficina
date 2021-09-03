@@ -149,6 +149,7 @@ class Lead(models.Model):
 
     crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
+    es_contacto = fields.Boolean(string='Es contacto', default=True)
 
     #@stacktrace
     def write(self, vals):
@@ -176,6 +177,12 @@ class Lead(models.Model):
             if similares and similares.get('cantidad_similares') > 0:
                 for vid in similares.get('leads_similares'):
                     self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
+
+        if 'user_id' in vals or self.es_contacto == False:
+            if self.stage_id == self.env['crm.stage'].search([('name', '=', 'Contacto')], limit=1):
+                vals['stage_id']  = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+
         return res
 
 
@@ -258,7 +265,7 @@ class Lead(models.Model):
     @api.onchange('user_id')
     def on_change_asesor(self):
         if self.stage_id.sequence < 2:
-            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+            self.es_contacto = False
 
     #@stacktrace
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
