@@ -168,7 +168,7 @@
                             <field name="fecha_posible" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="fecha_reserva" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="metodo_pago" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
-                            <field name="modelo_seleccionado_id"/>
+                            <field name="modelo_seleccionado_id" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="casa_seleccionada_id"
                                 domain="[('product_id','in',[modelo_seleccionado_id])]" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>                            
                         </group>
@@ -235,8 +235,8 @@
                     <group string="Formalización">
                         <group>
                             <!--field name="req_fecha_contrato_listo"/-->
-                            <field name="req_fecha_formalizacion"/>
                             <field name="entidad_bancaria"/>
+                            <field name="req_fecha_formalizacion"/>
                         </group>
                     </group>
                 </page>
