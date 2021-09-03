@@ -20,6 +20,8 @@ class xWhatsapp(models.Model):
     qr_code_image = fields.Binary(string="QR code")
     whatsapp_authenticate = fields.Boolean(string="Authenticate", default=False)
     active = fields.Boolean(string="Activo", default="True")
+    fecha_desde_carga_inicial = fields.Date(string="Fecha Inicial Cargas", required="True", help="Fecha desde la que se van a cargar nuevos mensajes")
+    instance_id = fields.Char(string="Instance ID", store=True, readonly=True, format='0')
 
     def action_get_qr_code_source(self):
         # if not self.whatsapp_endpoint or not self.whatsapp_token:
@@ -32,6 +34,10 @@ class xWhatsapp(models.Model):
             'type': 'ir.actions.act_window',
             'target': 'new',
         }
+
+    @api.onchange('whatsapp_endpoint')
+    def onchange_whatsapp_endpoint(self):
+        self.instance_id = self.whatsapp_endpoint[self.whatsapp_endpoint.find('instance')+8:]
 
     def action_logout_from_whatsapp_source(self):        
         url = self.whatsapp_endpoint + '/logout?token=' + self.whatsapp_token

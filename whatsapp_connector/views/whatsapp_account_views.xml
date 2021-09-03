@@ -23,6 +23,8 @@
                     <field name="phone"/>
                     <field name="whatsapp_endpoint"/>
                     <field name="whatsapp_token" password="True"/>
+                    <field name="instance_id"/>
+                    <field name="fecha_desde_carga_inicial"/>
                     <field name="active" widget="boolean_toggle" />
                 </tree>
             </field>
@@ -39,6 +41,7 @@
                                 <field name="whatsapp_authenticate" invisible="1"/>
                                 <field name="name" string="Nombre"/>
                                 <field name="phone" string="Phone" widget="phone" options="{'enable_sms': false}"/>
+                                <field name="fecha_desde_carga_inicial" options="{'format': 'DD/MM/YYYY'}"/>
                             </group>
                             <group>
                                 <field name="active" widget="boolean_toggle" />
@@ -46,7 +49,14 @@
                         </group>
                         <group>
                             <field name="whatsapp_endpoint"/>
-                            <field name="whatsapp_token" password="True"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="whatsapp_token" password="True"/>
+                            </group>
+                            <group>
+                                <field name="instance_id" force_save="1"/>
+                            </group>
                         </group>
                         <group>
                             <div class="col-lg-6 col-12 o_setting_box" attrs="{'invisible': [('whatsapp_authenticate','!=',False)]}">
