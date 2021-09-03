@@ -77,6 +77,9 @@ class Whatsapp(http.Controller):
 
             carga_inicial_desde_utime = time.mktime(waccount_id.fecha_desde_carga_inicial.timetuple())
 
+            # funcion que se usara más adelante
+            busca_leads = lambda search_condition, search_order : crm_lead_obj.sudo().search(search_condition, order=search_order, limit=1)
+
             for msg in data['messages']:
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: msg: %s', msg)
                 chat_id = msg.get('chatId')
@@ -84,14 +87,20 @@ class Whatsapp(http.Controller):
                 sender = str(msg.get('senderName', 'Cliente'))
                 msg_utime = msg.get('time')
 
+                parsed_phone = phonenumbers.parse(phone, 'CR')
+                parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
+
                 if msg.get('fromMe'):
                     #Mensajes enviados - desde el telefono o la app CRM(estos tienen un apostrofe al inicio)
                     if not ("`" in msg.get('body')[:4]):
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es de FromMe: %s', msg.get('body'))
                         # el mensaje no generado por por el CRM, sino que fue ingresado directamente en el Whatsapp del teléfono
                         # TODO: Considerar si nay lead con igual numero o celular
-                        crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
-                                                                       '|', '|', ('phone', '=', phone), ('mobile', '=', phone), ('x_chat_id', '=', chat_id)], limit=1)
+
+                        crm_lead_id = busca_leads(['&', ('stage_id.sequence', '!=', 6), '|', ('phone', '=', parsed_phone), ('x_chat_id', '=', chat_id)], 'x_chat_id')
+                        if not crm_lead_id:
+                            crm_lead_id = busca_leads(['&', ('stage_id.sequence', '!=', 6), ('mobile', '=', parsed_phone)], 'mobile')
+
                         if crm_lead_id:
                             sender = request.env.user.name
                             crm_lead_id.message_post(
@@ -103,10 +112,10 @@ class Whatsapp(http.Controller):
                 elif 'chatId' in msg and msg['chatId'] and not msg.get('fromMe'):
                     #Mensajes entrantes
                     _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es NO es de FromMe: %s', phone)
-                    parsed_phone = phonenumbers.parse(phone, 'CR')
-                    parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
-                    crm_lead_id = crm_lead_obj.sudo().search(['&', ('stage_id.sequence', '!=', 6),
-                                                                   '|', '|', ('phone', '=', parsed_phone), ('mobile', '=', parsed_phone), ('x_chat_id', '=', chat_id)], limit=1)
+                    
+                    crm_lead_id = busca_leads(['&', ('stage_id.sequence', '!=', 6), '|', ('phone', '=', parsed_phone), ('x_chat_id', '=', chat_id)], 'x_chat_id')
+                    if not crm_lead_id:
+                        crm_lead_id = busca_leads(['&', ('stage_id.sequence', '!=', 6), ('mobile', '=', parsed_phone)], 'mobile')
 
 
                     if not crm_lead_id:
