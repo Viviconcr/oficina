@@ -79,6 +79,7 @@
                 <field name="partner_id" invisible="1"/>
                 <h2>Prospecto</h2>
                 <field name="name" string="Nombre Completo"/>
+                <field name="stage_sequence" invisible="1"/>
             </xpath>
 
             <xpath expr="//group[@name='opportunity_partner']/label[@for='phone']" position="replace">
@@ -178,7 +179,7 @@
                         </group>
                     </group>
                 </page>
-                <page string="Negociación" name="negociacion" attrs="{'invisible': [('stage_id', '&lt;', 3)]}">
+                <page string="Negociación" name="negociacion" attrs="{'invisible': [('stage_sequence', '&lt;', 3)]}">
                     <group>
                         <field name="negociacion_solicitada" attrs="{'readonly': [('negociacion_aprobada','=',True)]}"/>
                         <field name="negociacion_aprobada" readonly="1"/>
@@ -195,7 +196,7 @@
                         </field>
                     </group>
                 </page>
-                <page string="Documentos" name="documentos" attrs="{'invisible': [('stage_id', '&lt;', 3)]}">
+                <page string="Documentos" name="documentos" attrs="{'invisible': [('stage_sequence', '&lt;', 3)]}">
                     <group string="Requisitos" name="reserva_requisitos">
                         <group>
                             <field name="req_copia_cedula"/>
@@ -206,14 +207,14 @@
                         </group>
                     </group>
                 </page>
-                <page string="Contrato" name="contrato" attrs="{'invisible': [('stage_id', '&lt;', 4)]}">
+                <page string="Contrato" name="contrato" attrs="{'invisible': [('stage_sequence', '&lt;', 4)]}">
                     <group string="Requisitos">
                         <group>
                             <field name="req_cumple_firma_contrato" readonly="1"/>
                         </group>
                     </group>
                 </page>
-                <page string="Seguimiento" name="Seguimiento" attrs="{'invisible': [('stage_id', '&lt;', 4)]}">
+                <page string="Seguimiento" name="Seguimiento" attrs="{'invisible': [('stage_sequence', '&lt;', 4)]}">
                         <group>
                             <field name="banco" />
                         </group>
@@ -229,7 +230,7 @@
                         </tree>
                     </field>
                 </page>               
-                <page string="Formalización" name="formalizacion" attrs="{'invisible': [('stage_id', '&lt;', 5)]}">
+                <page string="Formalización" name="formalizacion" attrs="{'invisible': [('stage_sequence', '&lt;', 5)]}">
                     <group string="Formalización">
                         <group>
                             <!--field name="req_fecha_contrato_listo"/-->

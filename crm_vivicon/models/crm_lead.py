@@ -145,6 +145,7 @@ class Lead(models.Model):
                                         string='Lead Similares',
                                         copy=False)
     stage_id = fields.Many2one(inverse=_inverseStage)
+    stage_sequence = fields.Integer(string='Stage Sequence', related='stage_id.sequence', store=True, index=True, readonly=True)
 
     crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
