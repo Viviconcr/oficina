@@ -154,6 +154,8 @@ class Lead(models.Model):
     #@stacktrace
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
+        
+        # similares
         similares = None
         if len(self) == 1 and self.active: 
             new_es_similar_a_otro = vals.get('es_similar_a_otro')            
@@ -170,19 +172,32 @@ class Lead(models.Model):
                     vals['cantidad_similares'] = 0
                     vals['es_similar_a_otro'] = False
 
+        # graba los datos del Lead 
         res = super(Lead, self).write(vals)
+
+        # similares
         if len(self) == 1:
             if self.cantidad_similares > 0:
                 self.lead_similares_ids.unlink()        
             if similares and similares.get('cantidad_similares') > 0:
                 for vid in similares.get('leads_similares'):
                     self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
+        # 
 
         if 'user_id' in vals or self.es_contacto == False:
             if self.stage_id == self.env['crm.stage'].search([('name', '=', 'Contacto')], limit=1):
                 vals['stage_id']  = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
+        return res
+
+    def create(self, vals):
+        res = super(Lead, self).create(vals)
+        if len(self) == 1:
+            similares = self.calcula_similares()       
+            if similares and similares.get('cantidad_similares') > 0:
+                for vid in similares.get('leads_similares'):
+                    self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
         return res
 
 
