@@ -333,7 +333,7 @@ class Lead(models.Model):
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=3)
                 elif lead.frecuencia_seguimiento == 'semanal':
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=7)
-                elif lead.frecuencia_seguimiento == 'semanal':
+                elif lead.frecuencia_seguimiento == 'quincenal':
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=14)
                 else:
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=30)
@@ -350,4 +350,5 @@ class Lead(models.Model):
                     'automated': True,
                 }
                 activity = self.env['mail.activity'].sudo().create(values)
-                activity._onchange_activity_type_id()
+                #activity._onchange_activity_type_id()
+
