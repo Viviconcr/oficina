@@ -65,11 +65,12 @@ class Whatsapp(http.Controller):
         if 'messages' in data and data['messages']:
             msg_list = []
             msg_dict = {}
-            crm_lead_obj = request.env['crm.lead']
-            crm_lead_id = ''
             instance_id = data.get('instanceId')
+            crm_lead_obj = request.env['crm.lead']
+            whatsapp_obj = request.env['xwhatsapp.account']
+            crm_lead_id = ''
 
-            waccount_id = None if not instance_id else self.env['xwhatsapp.account'].search([('instance_id','=', instance_id )], limit=1)
+            waccount_id = None if not instance_id else whatsapp_obj.sudo().search([('instance_id','=', instance_id )], limit=1)
 
             if not waccount_id:
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: No está registrada una cuenta de Whatsapp con instance_id : %s', instance_id )
