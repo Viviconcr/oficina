@@ -151,6 +151,19 @@ class Lead(models.Model):
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
     es_contacto = fields.Boolean(string='Es contacto', default=True)
 
+
+    @api.model
+    def create(self, vals_list):
+        res = super(Lead, self).create(vals_list)
+        if len(res) == 1:
+            similares = res.calcula_similares()
+            if similares and similares.get('cantidad_similares') > 0:
+                for vid in similares.get('leads_similares'):
+                    res.env['xcrm.lead.similares'].sudo().create({'lead_id': res.id, 'lead_similar_id': vid})
+                res.cantidad_similares = similares.get('cantidad_similares')
+                res.es_similar_a_otro = True
+        return res
+
     #@stacktrace
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
@@ -190,16 +203,6 @@ class Lead(models.Model):
                 self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
         return res
-
-    def create(self, vals):
-        res = super(Lead, self).create(vals)
-        if len(self) == 1:
-            similares = self.calcula_similares()       
-            if similares and similares.get('cantidad_similares') > 0:
-                for vid in similares.get('leads_similares'):
-                    self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
-        return res
-
 
     #@stacktrace
     def calcula_similares(self):        
