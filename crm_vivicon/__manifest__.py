@@ -19,6 +19,7 @@
         'data/ir_cron_data.xml',
         'views/stock_production_lot_views.xml',
         'views/crm_metodos_pago_views.xml',
+        'views/mail_activity_views.xml',
         'views/crm_lead_views.xml',
         'views/crm_projects_views.xml',
         'views/menu_views.xml',

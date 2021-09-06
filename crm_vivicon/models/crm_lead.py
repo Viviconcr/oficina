@@ -343,4 +343,4 @@ class Lead(models.Model):
                     'automated': True,
                 }
                 activity = self.env['mail.activity'].sudo().create(values)
-                activity._onchange_activity_type_id()
+                #activity._onchange_activity_type_id()
