@@ -149,10 +149,26 @@ class Lead(models.Model):
 
     crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
+    es_contacto = fields.Boolean(string='Es contacto', default=True)
+
+
+    @api.model
+    def create(self, vals_list):
+        res = super(Lead, self).create(vals_list)
+        if len(res) == 1:
+            similares = res.calcula_similares()
+            if similares and similares.get('cantidad_similares') > 0:
+                for vid in similares.get('leads_similares'):
+                    res.env['xcrm.lead.similares'].sudo().create({'lead_id': res.id, 'lead_similar_id': vid})
+                res.cantidad_similares = similares.get('cantidad_similares')
+                res.es_similar_a_otro = True
+        return res
 
     #@stacktrace
     def write(self, vals):
         # if len(self) == 1 and self.active and not self.stage_id.is_won:
+        
+        # similares
         similares = None
         if len(self) == 1 and self.active: 
             new_es_similar_a_otro = vals.get('es_similar_a_otro')            
@@ -169,15 +185,24 @@ class Lead(models.Model):
                     vals['cantidad_similares'] = 0
                     vals['es_similar_a_otro'] = False
 
+        # graba los datos del Lead 
         res = super(Lead, self).write(vals)
+
+        # similares
         if len(self) == 1:
             if self.cantidad_similares > 0:
                 self.lead_similares_ids.unlink()        
             if similares and similares.get('cantidad_similares') > 0:
                 for vid in similares.get('leads_similares'):
                     self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
-        return res
+        # 
 
+        if 'user_id' in vals or self.es_contacto == False:
+            if self.stage_id == self.env['crm.stage'].search([('name', '=', 'Contacto')], limit=1):
+                vals['stage_id']  = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+
+        return res
 
     #@stacktrace
     def calcula_similares(self):        
@@ -190,22 +215,40 @@ class Lead(models.Model):
         for r in leads:
             if r.id != self.id:
                 vid = None
-                l1 = ' '.join(self.name.split())    # divide el nombre en las partes que tiene y luego las uno con solo un espacio
-                l2 = ' '.join(r.name.split())
-                if l1 == l2:
-                    vid = r.id                
+                email = None if not self.email_from else self.email_from.replace(',',';').replace(' ','').upper().split(';')
+                phone = None if not self.phone else self.phone.replace(',',';').replace(' ','').upper().split(';')
+                #---- Revisa si existen otros lead con Telefono y correos similares
+                name = ' '.join(self.name.split())    # divide el nombre en las partes que tiene y luego las uno con solo un espacio
+                dat = ' '.join(r.name.split())
+                if name == dat:
+                    vid = r.id
                 # verifica si tienen correos en comun
                 if not vid and self.email_from and r.email_from:
-                    l1 = self.email_from.replace(',',';').replace(' ','').upper().split(';')
-                    l2 = r.email_from.replace(',',';').replace(' ','').upper().split(';')
-                    if (set(l1) & set(l2)):
+                    dat = r.email_from.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(email) & set(dat)):
                         vid = r.id
-                # verifica si tienen telefonos en comun
+                # verifica si tienen teléfonos en comun
                 if not vid and self.phone and r.phone:
-                    l1 = self.phone.replace(',',';').replace(' ','').upper().split(';')
-                    l2 = r.phone.replace(',',';').replace(' ','').upper().split(';')
-                    if (set(l1) & set(l2)):
+                    dat = r.phone.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(phone) & set(dat)):
                         vid = r.id
+
+                #---- Revisa si existen otros lead donde los datos de contactos sean similares a los de este lead
+                if not vid and r.contact_name:
+                    dat = ' '.join(r.contact_name.split())
+                    if name == dat:
+                        vid = r.id
+                # verifica si el correo del contacto es identico al de este lead
+                if not vid and email and r.function:
+                    dat = r.function.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(email) & set(dat)):
+                        vid = r.id
+                # verifica si tienen teléfonos en comun datos de contactos de otros lead
+                if not vid and phone and r.mobile:
+                    dat = r.mobile.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(phone) & set(dat)):
+                        vid = r.id
+                #
                 if vid:
                     leads_similares.append( vid )
                     cantidad += 1
@@ -258,7 +301,7 @@ class Lead(models.Model):
     @api.onchange('user_id')
     def on_change_asesor(self):
         if self.stage_id.sequence < 2:
-            self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+            self.es_contacto = False
 
     #@stacktrace
     @api.onchange('fecha_reserva', 'metodo_pago', 'numero_comprobante', 'monto_pago')
@@ -326,7 +369,7 @@ class Lead(models.Model):
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=3)
                 elif lead.frecuencia_seguimiento == 'semanal':
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=7)
-                elif lead.frecuencia_seguimiento == 'semanal':
+                elif lead.frecuencia_seguimiento == 'quincenal':
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=14)
                 else:
                     proximo_seguimiento = ultimo_seguimiento + timedelta(days=30)

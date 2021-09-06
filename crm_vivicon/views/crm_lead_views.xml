@@ -78,8 +78,9 @@
             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="replace">
                 <field name="partner_id" invisible="1"/>
                 <h2>Prospecto</h2>
-                <field name="name" string="Nombre Completo"/>
+                <field name="name" string="Nombre Completo" placeholder="Nombre + Apellidos" help="Indicar nombre con apellidos"/>
                 <field name="stage_sequence" invisible="1"/>
+                <field name="es_contacto" invisible="1"/>
             </xpath>
 
             <xpath expr="//group[@name='opportunity_partner']/label[@for='phone']" position="replace">
@@ -107,7 +108,7 @@
             </field>        
             <field name="tag_ids" position="replace">
                 <h2>Contacto Relacionado</h2>
-                <field name="contact_name" id="contact_name_page_lead" string="Nombre"/>
+                <field name="contact_name" id="contact_name_page_lead" string="Nombre Completo" placeholder="Nombre + Apellidos" help="Indicar nombre con apellidos"/>
                 <field name="function" string="Correo electrónico"/>
                 <field name="mobile" id="mobile_page_lead" string="Teléfono" widget="phone"/>
                 <label for="es_similar_a_otro" string="Posible Duplicación" />
@@ -167,7 +168,7 @@
                             <field name="fecha_posible" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="fecha_reserva" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="metodo_pago" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
-                            <field name="modelo_seleccionado_id"/>
+                            <field name="modelo_seleccionado_id" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
                             <field name="casa_seleccionada_id"
                                 domain="[('product_id','in',[modelo_seleccionado_id])]" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>                            
                         </group>
@@ -234,8 +235,8 @@
                     <group string="Formalización">
                         <group>
                             <!--field name="req_fecha_contrato_listo"/-->
-                            <field name="req_fecha_formalizacion"/>
                             <field name="entidad_bancaria"/>
+                            <field name="req_fecha_formalizacion"/>
                         </group>
                     </group>
                 </page>

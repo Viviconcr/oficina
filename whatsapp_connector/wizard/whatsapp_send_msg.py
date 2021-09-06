@@ -5,6 +5,7 @@ import json
 import requests
 import datetime
 import phonenumbers
+import base64
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ class SendWAMessageMarketing(models.TransientModel):
         elif not dest_phone:
             raise UserError('action_send_msg: No recibió la variable de contexto "whatsapp_dest_phone" ')
 
-        # _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
+        _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
         waccount = self.env['xwhatsapp.account'].browse(waccount_id)
 
         # _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))        
@@ -65,7 +66,7 @@ class SendWAMessageMarketing(models.TransientModel):
         # _logger.info(">> whatsapp_send_msg.action_send_msg: - \n Parsed phone: %s", parsed_phone)
         parsed_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
         sender = self.env.user.name
-        
+
         if ((status_response.status_code == 200 or status_response.status_code == 201) and json_response_status['accountStatus'] == 'authenticated' ):
 
             url = waccount.whatsapp_endpoint + '/sendMessage?token=' + waccount.whatsapp_token
@@ -77,13 +78,16 @@ class SendWAMessageMarketing(models.TransientModel):
             response = requests.post(url, json.dumps(tmp_dict), headers=headers)
             
             # El mensaje se coloca en el chatter y se le agrega el inicio el caracter ` para que el controller
-            # no los agregue al chatter tambien 
+            # no los agregue tambien 
             if response.status_code == 201 or response.status_code == 200:
+                attachments = []
+                for attachment in self.attachment_ids:
+                    attachments.append( ['wm'+str(attachment.id)+'_'+attachment.name, base64.b64decode(attachment.datas)] )
                 rec.message_post(body= "`" + sender + ": " + self.message,
                                 subject= sender,
                                 message_type= 'notification',
                                 parent_id= False,
-                                attachments= self.attachment_ids,
+                                attachments= attachments,
                                 )
 
             if self.attachment_ids:
