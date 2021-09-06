@@ -215,22 +215,40 @@ class Lead(models.Model):
         for r in leads:
             if r.id != self.id:
                 vid = None
-                l1 = ' '.join(self.name.split())    # divide el nombre en las partes que tiene y luego las uno con solo un espacio
-                l2 = ' '.join(r.name.split())
-                if l1 == l2:
-                    vid = r.id                
+                email = None if not self.email_from else self.email_from.replace(',',';').replace(' ','').upper().split(';')
+                phone = None if not self.phone else self.phone.replace(',',';').replace(' ','').upper().split(';')
+                #---- Revisa si existen otros lead con Telefono y correos similares
+                name = ' '.join(self.name.split())    # divide el nombre en las partes que tiene y luego las uno con solo un espacio
+                dat = ' '.join(r.name.split())
+                if name == dat:
+                    vid = r.id
                 # verifica si tienen correos en comun
                 if not vid and self.email_from and r.email_from:
-                    l1 = self.email_from.replace(',',';').replace(' ','').upper().split(';')
-                    l2 = r.email_from.replace(',',';').replace(' ','').upper().split(';')
-                    if (set(l1) & set(l2)):
+                    dat = r.email_from.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(email) & set(dat)):
                         vid = r.id
-                # verifica si tienen telefonos en comun
+                # verifica si tienen teléfonos en comun
                 if not vid and self.phone and r.phone:
-                    l1 = self.phone.replace(',',';').replace(' ','').upper().split(';')
-                    l2 = r.phone.replace(',',';').replace(' ','').upper().split(';')
-                    if (set(l1) & set(l2)):
+                    dat = r.phone.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(phone) & set(dat)):
                         vid = r.id
+
+                #---- Revisa si existen otros lead donde los datos de contactos sean similares a los de este lead
+                if not vid and r.contact_name:
+                    dat = ' '.join(r.contact_name.split())
+                    if name == dat:
+                        vid = r.id
+                # verifica si el correo del contacto es identico al de este lead
+                if not vid and email and r.function:
+                    dat = r.function.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(email) & set(dat)):
+                        vid = r.id
+                # verifica si tienen teléfonos en comun datos de contactos de otros lead
+                if not vid and phone and r.mobile:
+                    dat = r.mobile.replace(',',';').replace(' ','').upper().split(';')
+                    if (set(phone) & set(dat)):
+                        vid = r.id
+                #
                 if vid:
                     leads_similares.append( vid )
                     cantidad += 1
