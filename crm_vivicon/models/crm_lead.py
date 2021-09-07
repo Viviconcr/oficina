@@ -332,6 +332,7 @@ class Lead(models.Model):
     def _seguimiento_prospectos(self):  # cron
         leads = self.env['crm.lead'].search(
             [('stage_id.sequence', '=', 2),
+             ('user_id', '!=', False),
              #('nivel_seguimiento', '<=', 2)  # we need to confirm if followup is needed for all leads in stage 2
             ],
         )
