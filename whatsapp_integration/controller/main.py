@@ -118,9 +118,7 @@ class Whatsapp(http.Controller):
                     if not crm_lead_id:
                         crm_lead_id = busca_leads(['&', ('stage_id.sequence', '!=', 6), ('mobile', '=', parsed_phone)], 'mobile')
 
-
                     if not crm_lead_id:
-
                         if msg_utime < carga_inicial_desde_utime:
                             continue
 
@@ -135,6 +133,8 @@ class Whatsapp(http.Controller):
                                                                 'medium_id': medium_id.id,
                                                                 'source_id': source_id.id,
                                                             })
+                    else:
+                        _logger.info('>> whatsapp_integration.whatsapp_lead_response: Mensaje recibido en el lead: %s', crm_lead_id.id)
                     crm_lead_id.message_post(
                                      body= sender + ": " + str(msg.get('body')),
                                      subject= sender,
