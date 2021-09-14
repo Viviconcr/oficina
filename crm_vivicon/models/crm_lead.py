@@ -195,12 +195,11 @@ class Lead(models.Model):
             if similares and similares.get('cantidad_similares') > 0:
                 for vid in similares.get('leads_similares'):
                     self.env['xcrm.lead.similares'].sudo().create({'lead_id': self.id, 'lead_similar_id': vid})
-        # 
-
-        if 'user_id' in vals or self.es_contacto == False:
-            if self.stage_id == self.env['crm.stage'].search([('name', '=', 'Contacto')], limit=1):
-                vals['stage_id']  = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
-                self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+       
+            if 'user_id' in vals or self.es_contacto == False:
+                if self.stage_id == self.env['crm.stage'].search([('name', '=', 'Contacto')], limit=1):
+                    vals['stage_id']  = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
+                    self.stage_id = self.env['crm.stage'].search([('name', '=', 'Prospecto')], limit=1)
 
         return res
 
