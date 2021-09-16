@@ -150,7 +150,10 @@ class Lead(models.Model):
     crm_project_id = fields.Many2one('xcrm.projects', string='Proyecto')
     other_phone = fields.Char(string='Otros Teléfonos', copy=False)
     es_contacto = fields.Boolean(string='Es contacto', default=True)
-
+    x_estado_mensaje = fields.Selection([
+        ('normal', 'Leído'),
+        ('done', 'Sin Leer')], string='Estado Mensajes',
+        copy=False, default='normal', required=True)
 
     @api.model
     def create(self, vals_list):
@@ -356,11 +359,11 @@ class Lead(models.Model):
                 if ultimo_seguimiento != today:  # caso contrario ya lo movimos y enviamos correo, por eso no se debe volver a enviar
                     lead.fecha_ultimo_seguimiento = today  # mover fecha para que no se genere una nueva si apenas se va a atender la que está pendiente
                     email_template = self.env.ref('crm_vivicon.email_template_actividad_atrasada', False)
-                    email_template.with_context(type='binary',
-                                                default_type='binary').send_mail(
-                                                                        lead.id,
-                                                                        raise_exception=False,
-                                                                        force_send=True)  # default_type='binary'
+                    # email_template.with_context(type='binary',
+                    #                             default_type='binary').send_mail(
+                    #                                                     lead.id,
+                    #                                                     raise_exception=False,
+                    #                                                     force_send=True)  # default_type='binary'
             elif not ultimo_seguimiento or ultimo_seguimiento < today:  # ya hay que programar un nuevo seguimiento
                 if not ultimo_seguimiento:
                     ultimo_seguimiento = today

@@ -52,7 +52,7 @@ class SendWAMessageMarketing(models.TransientModel):
         elif not dest_phone:
             raise UserError('action_send_msg: No recibió la variable de contexto "whatsapp_dest_phone" ')
 
-        _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
         waccount = self.env['xwhatsapp.account'].browse(waccount_id)
 
         # _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))        
@@ -89,6 +89,7 @@ class SendWAMessageMarketing(models.TransientModel):
                                 parent_id= False,
                                 attachments= attachments,
                                 )
+                rec.sudo().write( {'x_estado_mensaje': 'normal'} )
 
             if self.attachment_ids:
                 for attachment in self.attachment_ids:

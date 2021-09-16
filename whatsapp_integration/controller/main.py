@@ -121,7 +121,6 @@ class Whatsapp(http.Controller):
                     if not crm_lead_id:
                         if msg_utime < carga_inicial_desde_utime:
                             continue
-
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es NO es de FromMe y Debe crar un nuevo lead')
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
                         medium_id = request.env.ref('whatsapp_integration.utm_medium_whatsapp')
@@ -132,8 +131,11 @@ class Whatsapp(http.Controller):
                                                                 'type': 'opportunity',
                                                                 'medium_id': medium_id.id,
                                                                 'source_id': source_id.id,
+                                                                'x_estado_mensaje': 'done'
                                                             })
                     else:
+                        # ya existe el lead
+                        crm_lead_id.sudo().write( {'x_estado_mensaje': 'done'} )
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: Mensaje recibido en el lead: %s', crm_lead_id.id)
                     crm_lead_id.message_post(
                                      body= sender + ": " + str(msg.get('body')),
@@ -141,4 +143,5 @@ class Whatsapp(http.Controller):
                                      message_type= 'notification',
                                      parent_id= False,
                     )
+
         return 'OK'

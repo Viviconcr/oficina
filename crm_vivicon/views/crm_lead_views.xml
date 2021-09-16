@@ -10,7 +10,12 @@
                 <attribute name="quick_create">0</attribute>
                 <attribute name="records_draggable">0</attribute>
             </xpath>
-            <progressbar field="activity_state" position="replace"/>
+            <progressbar field="activity_state" position="replace">
+                <progressbar field="x_estado_mensaje" colors='{"done": "success", "normal": "muted"}'/>
+            </progressbar>
+            <xpath expr="//div[@class='oe_kanban_bottom_right']/field[@name='user_id']" position="before">
+                <field name="x_estado_mensaje" widget="state_selection"/>
+            </xpath>
         </field>        
     </record>        
 
@@ -77,7 +82,10 @@
             </field>
             <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="replace">
                 <field name="partner_id" invisible="1"/>
-                <h2>Prospecto</h2>
+                <div style="display: flex;">
+                    <h2>Prospecto</h2>
+                    <field name="x_estado_mensaje" widget="state_selection" string=" " style="margin-left:20px;"/>
+                </div>
                 <field name="name" string="Nombre Completo" placeholder="Nombre + Apellidos" help="Indicar nombre con apellidos"/>
                 <field name="stage_sequence" invisible="1"/>
                 <field name="es_contacto" invisible="1"/>
@@ -126,7 +134,7 @@
             </page-->
             <page name="internal_notes" position="replace">
                 <page string="Origen" name="origen">
-<!--attrs="{'invisible': ['|','|',('stage_id', '&lt;', 1),('stage_id', '=', 2),('stage_id', '=', 3)]}"-->
+                <!--attrs="{'invisible': ['|','|',('stage_id', '&lt;', 1),('stage_id', '=', 2),('stage_id', '=', 3)]}"-->
                     <group string="Origen de Oportunidad">
                         <group>
                             <field name="source_id" string="Cómo nos contactó?"/>
@@ -162,7 +170,7 @@
                     </group>
                 </page>
                 <page string="Reserva" name="reserva">
-<!--attrs="{'invisible': ['|',('stage_id', '=', 1),('stage_id', '=', 2)]}"-->
+                <!--attrs="{'invisible': ['|',('stage_id', '=', 1),('stage_id', '=', 2)]}"-->
                     <group name="reserva_general">
                         <group >
                             <field name="fecha_posible" attrs="{'required': [('numero_comprobante', '!=', False)]}"/>
