@@ -139,7 +139,7 @@ class Whatsapp(http.Controller):
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: Mensaje recibido en el lead: %s', crm_lead_id.id)
                     #Id del asesor al que esta asociado el lead, si no tuviera, se registra al usuario publico
                     notification_ids = [(0, 0, {
-                        'res_partner_id': crm_lead_id.user_id.id | request.env.ref('base.public_user').id,
+                        'res_partner_id': crm_lead_id.user_id.partner_id.id | request.env.ref('base.public_user').partner_id.id,
                         'notification_type': 'inbox'
                     })]
                     crm_lead_id.message_post(
@@ -149,6 +149,6 @@ class Whatsapp(http.Controller):
                                      parent_id= False,
                                      notification_ids=notification_ids,
                                      subtype_id= request.env.ref("mail.mt_comment").id,
-                                     author_id=request.env.ref('base.public_user').id #se registra como autor al usuario publico
+                                     author_id=request.env.ref('base.public_user').partner_id.id #se registra como autor al usuario publico
                     )
         return 'OK'
