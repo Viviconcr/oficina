@@ -22,6 +22,7 @@
         'views/mail_activity_views.xml',
         'views/crm_lead_views.xml',
         'views/crm_projects_views.xml',
+        'wizard/crm_lead_lost_views.xml',
         'views/menu_views.xml',
         'security/ir.model.access.csv',
     ],
