@@ -89,7 +89,8 @@ class Whatsapp(http.Controller):
                 msg_utime = msg.get('time')
 
                 parsed_phone = phonenumbers.parse(phone, 'CR')
-                parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
+                parsed_phone = phonenumbers.format_number( parsed_phone , phonenumbers.PhoneNumberFormat.INTERNATIONAL )
+                # parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
 
                 if msg.get('fromMe'):
                     #Mensajes enviados - desde el telefono o la app CRM(estos tienen un apostrofe al inicio)
