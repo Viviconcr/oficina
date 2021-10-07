@@ -4,9 +4,6 @@ import sys, getopt
 import odoorpc
 import json
 
-import logging
-_logger = logging.getLogger(__name__)
-
 
 def get_params(argv):
     server = database = user = password = json_lead = False
@@ -44,17 +41,12 @@ def get_params(argv):
 # -s localhost -d v14_test -u support@cysfuturo.com -p asdfG.9811 -j '{"tipoLead": "proyecto", "nombreCompleto": "Arturo Lopez Lopez", "email": "correo@micorreo.com", "telefono1": "2222-4444", "relacionPropiedad": "dueño del terreno", "interesPrincipal": "Avenir Esmeralda", "planoCatastro": "100-1341-1029130",  "ubicacion": "Alajuela centro","mensaje": "este cliente molesta mucho, hay que cobrarle un regargo 10%"}'
 def main(argv):
     (server, database, user, password, json_lead) = get_params(argv)
-    odoo = odoorpc.ODOO(server, port=8069)  
+    odoo = odoorpc.ODOO(server, port=8069)
     odoo.login(database, user, password)
     crm_lead_obj = odoo.env['crm.lead']
     mail_message_obj = odoo.env['mail.message']
     original_json = json.loads(json_lead)
     tipoLead = original_json["tipoLead"]
-
-    # external_id de el medium y source asiciado a Website
-    source_id = crm_lead_obj.env.ref('utm.utm_source_newsletter')
-    medium_id = crm_lead_obj.env.ref('utm.utm_medium_website')
-
     if tipoLead == 'contacto':
         final_json = {
             "name": " ".join([original_json["nombre"], original_json["apellido1"], original_json["apellido2"]]),
@@ -62,14 +54,11 @@ def main(argv):
             "phone": original_json["telefono1"],
             "mobile": original_json["telefono2"],
             #"metodo_contacto":"telefono"
-            "medium_id": medium_id.id,
-            "source_id": source_id.id,
         }
-        _logger.info('>> crm_lead.create_lead: Lead contacto creado: m: %s / s: %s', medium_id.id, source_id.id)
         lead_id = crm_lead_obj.create(final_json)
         mail_message_obj.create({
             'model': 'crm.lead',
-            'res_id': lead_id, 
+            'res_id': lead_id,
             'subject': 'Observaciones',
             'body': observaciones,
         })
@@ -80,7 +69,7 @@ def main(argv):
         ])
         mail_message_obj.create({
             'model': 'crm.lead',
-            'res_id': lead_id, 
+            'res_id': lead_id,
             'subject': 'C O N T A C T O',
             'body': observaciones,
         })
@@ -89,10 +78,7 @@ def main(argv):
             "name": original_json["nombreCompleto"],
             "email_from": original_json["email"],
             "phone": original_json["telefono1"],
-            "medium_id": medium_id.id,
-            "source_id": source_id.id,
         }
-        _logger.info('>> crm_lead.create_lead: Lead proyecto creado: m: %s / s: %s', medium_id.id, source_id.id)
         lead_id = crm_lead_obj.create(final_json)
 
         observaciones = '\n'.join([
@@ -106,11 +92,10 @@ def main(argv):
 
         mail_message_obj.create({
             'model': 'crm.lead',
-            'res_id': lead_id, 
+            'res_id': lead_id,
             'subject': 'P R O Y E C T O',
             'body': observaciones,
         })
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
