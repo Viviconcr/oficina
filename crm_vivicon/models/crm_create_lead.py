@@ -52,8 +52,8 @@ def main(argv):
     tipoLead = original_json["tipoLead"]
 
     # external_id de el medium y source asiciado a Website
-    source_id = odoo.env.ref('utm.utm_source_newsletter')
-    medium_id = odoo.env.ref('utm.utm_medium_website')
+    source_id = crm_lead_obj.env.ref('utm.utm_source_newsletter')
+    medium_id = crm_lead_obj.env.ref('utm.utm_medium_website')
 
     if tipoLead == 'contacto':
         final_json = {
