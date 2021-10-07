@@ -4,6 +4,9 @@ import sys, getopt
 import odoorpc
 import json
 
+import logging
+_logger = logging.getLogger(__name__)
+
 
 def get_params(argv):
     server = database = user = password = json_lead = False
@@ -59,9 +62,10 @@ def main(argv):
             "phone": original_json["telefono1"],
             "mobile": original_json["telefono2"],
             #"metodo_contacto":"telefono"
-            'medium_id': medium_id.id,
-            'source_id': source_id.id,
+            "medium_id": medium_id.id,
+            "source_id": source_id.id,
         }
+        _logger.info('>> crm_lead.create_lead: Lead contacto creado: m: %s / s: %s', medium_id.id, source_id.id)
         lead_id = crm_lead_obj.create(final_json)
         mail_message_obj.create({
             'model': 'crm.lead',
@@ -85,9 +89,10 @@ def main(argv):
             "name": original_json["nombreCompleto"],
             "email_from": original_json["email"],
             "phone": original_json["telefono1"],
-            'medium_id': medium_id.id,
-            'source_id': source_id.id,
+            "medium_id": medium_id.id,
+            "source_id": source_id.id,
         }
+        _logger.info('>> crm_lead.create_lead: Lead proyecto creado: m: %s / s: %s', medium_id.id, source_id.id)
         lead_id = crm_lead_obj.create(final_json)
 
         observaciones = '\n'.join([
