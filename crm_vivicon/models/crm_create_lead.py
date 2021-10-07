@@ -47,6 +47,11 @@ def main(argv):
     mail_message_obj = odoo.env['mail.message']
     original_json = json.loads(json_lead)
     tipoLead = original_json["tipoLead"]
+
+    # external_id de el medium y source asiciado a Website
+    source_id = odoo.env.ref('utm.utm_source_newsletter')
+    medium_id = odoo.env.ref('utm.utm_medium_website')
+
     if tipoLead == 'contacto':
         final_json = {
             "name": " ".join([original_json["nombre"], original_json["apellido1"], original_json["apellido2"]]),
@@ -54,6 +59,8 @@ def main(argv):
             "phone": original_json["telefono1"],
             "mobile": original_json["telefono2"],
             #"metodo_contacto":"telefono"
+            'medium_id': medium_id.id,
+            'source_id': source_id.id,
         }
         lead_id = crm_lead_obj.create(final_json)
         mail_message_obj.create({
@@ -78,6 +85,8 @@ def main(argv):
             "name": original_json["nombreCompleto"],
             "email_from": original_json["email"],
             "phone": original_json["telefono1"],
+            'medium_id': medium_id.id,
+            'source_id': source_id.id,
         }
         lead_id = crm_lead_obj.create(final_json)
 
