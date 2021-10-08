@@ -154,6 +154,7 @@ class Lead(models.Model):
         ('normal', 'Leído'),
         ('done', 'Sin Leer')], string='Estado Mensajes',
         copy=False, default='normal', required=True)
+    x_lost_detail = fields.Char(string='Detalle', help='Detalle de la perdida')
 
     @api.model
     def create(self, vals_list):
@@ -166,6 +167,20 @@ class Lead(models.Model):
                 res.cantidad_similares = similares.get('cantidad_similares')
                 res.es_similar_a_otro = True
         return res
+
+    def toggle_active(self):
+        res = super(Lead, self).toggle_active()
+        activated = self.filtered(lambda lead: lead.active)
+        if activated:
+            activated.write({'x_lost_detail': False})
+
+    def unlink(self):
+        for rec in self:
+            relsimimlar = self.env['xcrm.lead.similares'].search([('lead_similar_id','=',rec.id)])
+            for rs in relsimimlar:
+                rs.unlink()
+
+        return super(Lead, self).unlink()
 
     #@stacktrace
     def write(self, vals):

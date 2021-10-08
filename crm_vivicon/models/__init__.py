@@ -7,3 +7,4 @@ from . import crm_metodos_pago
 from . import crm_lead_similares
 from . import seguimiento_crm
 from . import crm_projects
+from . import mail_activity
