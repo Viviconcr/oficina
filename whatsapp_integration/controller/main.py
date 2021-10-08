@@ -134,6 +134,12 @@ class Whatsapp(http.Controller):
                                                                 'source_id': source_id.id,
                                                                 'x_estado_mensaje': 'done'
                                                             })
+                        email_template = self.env.ref('crm_vivicon.email_template_new_lead_whatsapp', False)
+                        email_template.with_context(type='binary',
+                                                    default_type='binary').send_mail(
+                                                                            crm_lead_id.id,
+                                                                            raise_exception=False,
+                                                                            force_send=True)  # default_type='binary'
                     else:
                         # ya existe el lead
                         crm_lead_id.sudo().write( {'x_estado_mensaje': 'done'} )
