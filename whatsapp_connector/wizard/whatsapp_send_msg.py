@@ -35,11 +35,39 @@ class SendWAMessageMarketing(models.TransientModel):
         return result
 
     def action_send_msg(self):
+
         active_model = self.env.context.get('active_model')
         active_id = self.env.context.get('active_id')
         if not active_model or not active_id:
             raise UserError('action_send_msg: No se pudo obtener el "active_model" or el registro actual' )            
         rec = self.env[active_model].browse( active_id )
+
+        email_template = self.env.ref('crm_vivicon.email_template_new_lead_whatsapp', False)
+        email_template.with_context(type='binary',
+                                    default_type='binary').send_mail(
+            rec.id,
+            raise_exception=False,
+            force_send=True)  # default_type='binary'
+
+        _logger.info('>> whatsapp_send_msg.email_Send: account %s,  URL: %s', str(waccount), status_url)
+        
+        return
+
+        notification_ids = [(0, 0, {
+            'res_partner_id': rec.user_id.id | self.env.ref('base.public_user').id,
+            'notification_type': 'inbox'
+        })]
+        rec.message_post(
+                         body= ": " + str(self.message),
+                         subject= 'sender',
+                         message_type= 'notification',
+                         parent_id= False,
+                         notification_ids=notification_ids,
+                         subtype_id= self.env.ref("mail.mt_comment").id,
+                         author_id=self.env.ref('base.public_user').id
+                        )
+        return
+
 
         wparam = rec.whatsapp_get_param()
 
