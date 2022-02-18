@@ -140,6 +140,9 @@ class CrmLead(models.Model):
     def lead_processing(self, r, form):
         if not r.get('data'):
             return
+        # momentaneamente se desactiva la insersions
+        return
+
         for lead in r['data']:
             lead = self.process_lead_field_data(lead)
             if not self.search(
