@@ -65,14 +65,14 @@ class SendWAMessageMarketing(models.TransientModel):
 
         _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))
         status_url = waccount.whatsapp_endpoint + '/status?token=' + waccount.whatsapp_token
-        _logger.info('>> whatsapp_send_msg.action_send_msg: account %s,  URL: %s', str(waccount), status_url)
+        _logger.info('>> whatsapp_send_msg.action_send_msg: URL: %s', status_url)
     
         status_response = requests.get(status_url)
-        _logger.info(">> whatsapp_send_msg.action_send_msg: - \n status_response: %s", str(status_response))
+        _logger.info(">> whatsapp_send_msg.action_send_msg: status_response for get: %s", str(status_response))
         json_response_status = json.loads(status_response.text)
 
         parsed_phone = phonenumbers.parse(dest_phone, 'CR')
-        _logger.info(">> whatsapp_send_msg.action_send_msg: - \n Parsed phone: %s", parsed_phone)
+        _logger.info(">> whatsapp_send_msg.action_send_msg: Parsed phone dest: %s", parsed_phone)
         parsed_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
         sender = self.env.user.name
 
@@ -84,8 +84,10 @@ class SendWAMessageMarketing(models.TransientModel):
             tmp_dict = { "chatId": str(wchat_id) } if wchat_id else { "phone": parsed_phone }
             tmp_dict.update( {"body": self.message} )
 
+            _logger.info(">> whatsapp_send_msg.action_send_msg: post: %s", parsed_phone)
             response = requests.post(url, json.dumps(tmp_dict), headers=headers)
-            
+            _logger.info(">> whatsapp_send_msg.action_send_msg: response for post: %s", str(response))
+
             # El mensaje se coloca en el chatter y se le agrega el inicio el caracter ` para que el controller
             # no los agregue tambien 
             if response.status_code == 201 or response.status_code == 200:
