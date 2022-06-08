@@ -84,7 +84,7 @@ class SendWAMessageMarketing(models.TransientModel):
             tmp_dict = { "chatId": str(wchat_id) } if wchat_id else { "phone": parsed_phone }
             tmp_dict.update( {"body": self.message} )
 
-            _logger.info(">> whatsapp_send_msg.action_send_msg: post: %s", parsed_phone)
+            _logger.info(">> whatsapp_send_msg.action_send_msg: post: dest: %s  - msg: %s", parsed_phone, self.message)
             response = requests.post(url, json.dumps(tmp_dict), headers=headers)
             _logger.info(">> whatsapp_send_msg.action_send_msg: response for post: %s", str(response))
 
