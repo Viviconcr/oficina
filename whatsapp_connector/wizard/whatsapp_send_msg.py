@@ -43,8 +43,8 @@ class SendWAMessageMarketing(models.TransientModel):
     def action_send_msg(self):
         active_model = self.env.context.get('active_model')
         active_id = self.env.context.get('active_id')
-        if not self.test_mode and not self.dest_phone:
-            raise UserError('Debe indicar el número de teléfono destino del mensaje')
+        if self.test_mode and not self.dest_phone:
+            raise UserError('En modo test, debe indicar el número de teléfono destino del mensaje')
         if not active_model or not active_id:
             raise UserError('action_send_msg: No se pudo obtener el "active_model" or el registro actual' )            
         rec = self.env[active_model].browse( active_id )
