@@ -92,12 +92,10 @@ class SendWAMessageMarketing(models.TransientModel):
                 attachments = []
                 for attachment in self.attachment_ids:
                     attachments.append( ['wm'+str(attachment.id)+'_'+attachment.name, base64.b64decode(attachment.datas)] )
-                rec.message_post(body= "`" + sender + ": " + self.message,
-                                subject= sender,
-                                message_type= 'notification',
-                                parent_id= False,
-                                attachments= attachments,
-                                )
+                if not self.test_mode:
+                    # suponemos que quien hace en envio, tiene  chatter
+                    rec.message_post(body= "`" + sender + ": " + self.message,
+                                    subject= sender, message_type='notification', parent_id=False, attachments=attachments, )
                 # rec.sudo().write( {'x_estado_mensaje': 'normal'} )
 
             if self.attachment_ids:
