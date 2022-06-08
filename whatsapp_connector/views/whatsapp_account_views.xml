@@ -35,6 +35,10 @@
             <field name="model">xwhatsapp.account</field>
             <field name="arch" type="xml">
                 <form string="Cuentas de Whatsapp">
+                    <header>
+                        <button string=" Test Send" type="object" name="action_send_test_msg" class="fa fa-whatsapp" />
+                    </header>
+
                     <sheet>
                         <group>
                             <group>

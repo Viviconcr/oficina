@@ -7,7 +7,9 @@
             <form string="Send a WhatsApp Message">
                 <sheet>
                     <group>
+                        <field name="test_mode" invisible="1" />
                         <field name="message" style="height='400px';"/>
+                        <field name="dest_phone" attrs="{'invisible':[('test_mode', '=', False)]}" />
                     </group>
                     <group col="4">
                         <field name="attachment_ids" widget="many2many_binary" string="Attach a file" nolabel="1" colspan="2"/>

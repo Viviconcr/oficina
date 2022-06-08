@@ -21,10 +21,14 @@ class SendWAMessageMarketing(models.TransientModel):
         dbuuid = IPC.get_param('database.uuid')
         return dbuuid + '_' + str(self.env.uid)
 
+
     message = fields.Text('Message', required=True)
     attachment_ids = fields.Many2many('ir.attachment', 'xwhatsapp_msg_source_ir_attachments_rel',
                                         'wizard_id', 'attachment_id', 'Attachments')
     unique_user = fields.Char(default=_default_unique_user)
+    test_mode = fields.Boolean(string='test mode', default=False)
+    dest_phone = fields.Char(string='Celular Destino')
+
 
     @api.model
     def default_get(self, fields):
@@ -32,11 +36,15 @@ class SendWAMessageMarketing(models.TransientModel):
         active_model = self.env.context.get('active_model')
         res_id = self.env.context.get('active_id')
         rec = self.env[active_model].browse(res_id)
+        if self.env.context.get('default_test_mode', False):
+            result.update({'test_mode': True})
         return result
 
     def action_send_msg(self):
         active_model = self.env.context.get('active_model')
         active_id = self.env.context.get('active_id')
+        if not self.test_mode and not self.dest_phone:
+            raise UserError('Debe indicar el número de teléfono destino del mensaje')
         if not active_model or not active_id:
             raise UserError('action_send_msg: No se pudo obtener el "active_model" or el registro actual' )            
         rec = self.env[active_model].browse( active_id )
@@ -45,25 +53,26 @@ class SendWAMessageMarketing(models.TransientModel):
 
         wchat_id = wparam.get('whatsapp_chat_id')
         waccount_id = wparam.get('whatsapp_account_id')
-        dest_phone = wparam.get('whatsapp_dest_phone')
+        dest_phone = self.dest_phone or wparam.get('whatsapp_dest_phone')
 
         if not waccount_id:
             raise UserError('action_send_msg: No recibió las variables de contexto "whatsapp_account_id" ')
         elif not dest_phone:
             raise UserError('action_send_msg: No recibió la variable de contexto "whatsapp_dest_phone" ')
 
-        # _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
+        _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
         waccount = self.env['xwhatsapp.account'].browse(waccount_id)
 
-        # _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))        
+        _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))
         status_url = waccount.whatsapp_endpoint + '/status?token=' + waccount.whatsapp_token
-        # _logger.info('>> whatsapp_send_msg.action_send_msg: account %s,  URL: %s', str(waccount), status_url)
+        _logger.info('>> whatsapp_send_msg.action_send_msg: account %s,  URL: %s', str(waccount), status_url)
     
         status_response = requests.get(status_url)
+        _logger.info(">> whatsapp_send_msg.action_send_msg: - \n status_response: %s", str(status_response))
         json_response_status = json.loads(status_response.text)
 
         parsed_phone = phonenumbers.parse(dest_phone, 'CR')
-        # _logger.info(">> whatsapp_send_msg.action_send_msg: - \n Parsed phone: %s", parsed_phone)
+        _logger.info(">> whatsapp_send_msg.action_send_msg: - \n Parsed phone: %s", parsed_phone)
         parsed_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
         sender = self.env.user.name
 
@@ -89,7 +98,7 @@ class SendWAMessageMarketing(models.TransientModel):
                                 parent_id= False,
                                 attachments= attachments,
                                 )
-                rec.sudo().write( {'x_estado_mensaje': 'normal'} )
+                # rec.sudo().write( {'x_estado_mensaje': 'normal'} )
 
             if self.attachment_ids:
                 for attachment in self.attachment_ids:
