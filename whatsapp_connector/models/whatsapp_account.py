@@ -59,9 +59,13 @@ class xWhatsapp(models.Model):
 
     def whatsapp_get_param(self):
         param = {'whatsapp_account_id': self.id, 'whatsapp_chat_id': None}
-        emp = self.env['hr.employee'].search([('user_id', '=', self.env.uid), ('company_id', '=', self.env.company.id)], limit=1)
-        if emp:
-            param.update({'whatsapp_dest_phone': emp.mobile_phone})
+        try:
+            emp = self.env['hr.employee'].search([('user_id', '=', self.env.uid), ('company_id', '=', self.env.company.id)], limit=1)
+            if emp:
+                param.update({'whatsapp_dest_phone': emp.mobile_phone})
+        except Exception:
+            # Ignora el error que se supone es porque no esta instalado el módulo de empleados
+            pass
         return param
 
     def action_send_test_msg(self):
