@@ -63,16 +63,16 @@ class SendWAMessageMarketing(models.TransientModel):
         _logger.info('>> whatsapp_send_msg.action_send_msg: account_id %s ', waccount_id)
         waccount = self.env['xwhatsapp.account'].browse(waccount_id)
 
-        _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: waccount %s ', str(waccount))
         status_url = waccount.whatsapp_endpoint + '/status?token=' + waccount.whatsapp_token
-        _logger.info('>> whatsapp_send_msg.action_send_msg: URL: %s', status_url)
+        # _logger.info('>> whatsapp_send_msg.action_send_msg: URL: %s', status_url)
     
         status_response = requests.get(status_url)
-        _logger.info(">> whatsapp_send_msg.action_send_msg: status_response for get: %s", str(status_response))
+        # _logger.info(">> whatsapp_send_msg.action_send_msg: status_response for get: %s", str(status_response))
         json_response_status = json.loads(status_response.text)
 
         parsed_phone = phonenumbers.parse(dest_phone, 'CR')
-        _logger.info(">> whatsapp_send_msg.action_send_msg: Parsed phone dest: %s", parsed_phone)
+        # _logger.info(">> whatsapp_send_msg.action_send_msg: Parsed phone dest: %s", parsed_phone)
         parsed_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
         sender = self.env.user.name
 
@@ -82,11 +82,11 @@ class SendWAMessageMarketing(models.TransientModel):
             headers = { "Content-Type": "application/json", }
 
             tmp_dict = { "chatId": str(wchat_id) } if wchat_id else { "phone": parsed_phone }
-            tmp_dict.update( {"body": self.message} )
+            tmp_dict.update( {"body": "`" + self.message} )
 
-            _logger.info(">> whatsapp_send_msg.action_send_msg: post: dest: %s  - msg: %s", parsed_phone, self.message)
+            # _logger.info(">> whatsapp_send_msg.action_send_msg: post: dest: %s  - msg: %s", parsed_phone, self.message)
             response = requests.post(url, json.dumps(tmp_dict), headers=headers)
-            _logger.info(">> whatsapp_send_msg.action_send_msg: response for post: %s", str(response))
+            # _logger.info(">> whatsapp_send_msg.action_send_msg: response for post: %s", str(response))
 
             # El mensaje se coloca en el chatter y se le agrega el inicio el caracter ` para que el controller
             # no los agregue tambien 
@@ -112,6 +112,6 @@ class SendWAMessageMarketing(models.TransientModel):
 
                         response_send_file = requests.post(url_send_file, json.dumps(dict_send_file), headers=headers_send_file)
                         if response_send_file.status_code == 201 or response_send_file.status_code == 200:
-                            _logger.info(">> whatsapp_send_msg.action_send_msg: \nSend file attachment successfully!!")
+                            _logger.info(">> whatsapp_send_msg.action_send_msg: Send file attachment successfully!!")
         else:
             raise UserError(_('Please authorize your mobile number with chat api. response data:') + str(status_response) )
