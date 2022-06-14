@@ -21,7 +21,7 @@ class xWhatsapp(models.Model):
     whatsapp_authenticate = fields.Boolean(string="Authenticate", default=False)
     active = fields.Boolean(string="Activo", default="True")
     fecha_desde_carga_inicial = fields.Date(string="Fecha Inicial Cargas", required="True", help="Fecha desde la que se van a cargar nuevos mensajes")
-    instance_id = fields.Char(string="Instance ID", store=True, readonly=True, format='0')
+    instance_id = fields.Char(string="Instance ID", store=True)
 
 
     def onchage_endpoint(self):

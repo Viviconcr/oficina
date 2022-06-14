@@ -11,7 +11,7 @@ class xCrmProjects(models.Model):
     _description = 'CRM Projects'
     # _rec_name = 'code'
 
-    code = fields.Char(String="Código", required="True", help="Código del Proyecto")
+    code = fields.Char(string="Código", required="True", help="Código del Proyecto")
     name = fields.Char(string="Nombre", required="True", help="Nombre del Proyecto")
     whatsapp_account_id = fields.Many2one('xwhatsapp.account', string='Cuenta WhatsApp')
     active = fields.Boolean(string="Activo", default="True")

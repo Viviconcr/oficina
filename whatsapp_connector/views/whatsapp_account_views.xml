@@ -59,7 +59,7 @@
                                 <field name="whatsapp_token" password="True"/>
                             </group>
                             <group>
-                                <field name="instance_id" force_save="1"/>
+                                <field name="instance_id"/>
                             </group>
                         </group>
                         <group>
