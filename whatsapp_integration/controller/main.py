@@ -63,11 +63,12 @@ class Whatsapp(http.Controller):
         data = json.loads(request.httprequest.data)
         _logger.info('>> whatsapp_integration.whatsapp_lead_response: webhook json: %s', data)
         if 'messages' in data and data['messages']:
-            msg_list = []
-            msg_dict = {}
+            # msg_list = []
+            # msg_dict = {}
+            instance_id = data.get('instanceId')
             crm_lead_obj = request.env['crm.lead']
             whatsapp_obj = request.env['xwhatsapp.account']
-            crm_lead_id = ''
+            # crm_lead_id = ''
 
             waccount_id = None if not instance_id else whatsapp_obj.sudo().search([('instance_id','=', instance_id )], limit=1)
 
