@@ -76,7 +76,8 @@ class Whatsapp(http.Controller):
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: No está registrada una cuenta de Whatsapp con instance_id : %s', instance_id )
                 return
 
-            carga_inicial_desde_utime = time.mktime(waccount_id.fecha_desde_carga_inicial.timetuple())
+            carga_inicial_desde_utime = int(round(float(time.mktime(waccount_id.fecha_desde_carga_inicial.timetuple())), 0))
+
 
             # funcion que se usara más adelante
             busca_leads = lambda search_condition, search_order : crm_lead_obj.sudo().search(search_condition, order=search_order, limit=1)
@@ -86,7 +87,7 @@ class Whatsapp(http.Controller):
                 chat_id = msg.get('chatId')
                 phone = "+" + re.split('[-@]', chat_id)[0]
                 sender = str(msg.get('senderName', 'Cliente'))
-                msg_utime = msg.get('time')
+                msg_utime = int(msg.get('time') or 0)
 
                 parsed_phone = phonenumbers.parse(phone, 'CR')
                 parsed_phone = phonenumbers.format_number( parsed_phone , phonenumbers.PhoneNumberFormat.INTERNATIONAL )
@@ -120,7 +121,7 @@ class Whatsapp(http.Controller):
                     if not crm_lead_id:
                         if msg_utime < carga_inicial_desde_utime:
                             continue
-                        _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje es NO es de FromMe y Debe crar un nuevo lead')
+                        _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje NO es de FromMe y Debe crar un nuevo lead')
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
                         medium_id = request.env.ref('whatsapp_integration.utm_medium_whatsapp')
                         crm_lead_id = crm_lead_obj.sudo().create({
