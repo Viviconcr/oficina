@@ -21,7 +21,6 @@ class SendWAMessageMarketing(models.TransientModel):
         dbuuid = IPC.get_param('database.uuid')
         return dbuuid + '_' + str(self.env.uid)
 
-
     message = fields.Text('Message', required=True)
     attachment_ids = fields.Many2many('ir.attachment', 'xwhatsapp_msg_source_ir_attachments_rel',
                                         'wizard_id', 'attachment_id', 'Attachments')
@@ -98,7 +97,6 @@ class SendWAMessageMarketing(models.TransientModel):
                     # suponemos que quien hace en envio, tiene  chatter
                     rec.message_post(body= "`" + sender + ": " + self.message,
                                     subject= sender, message_type='notification', parent_id=False, attachments=attachments, )
-                # rec.sudo().write( {'x_estado_mensaje': 'normal'} )
 
             if self.attachment_ids:
                 for attachment in self.attachment_ids:

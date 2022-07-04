@@ -38,7 +38,6 @@
                     <header>
                         <button string=" Test Send" type="object" name="action_send_test_msg" class="fa fa-whatsapp" />
                     </header>
-
                     <sheet>
                         <group>
                             <group>
@@ -49,6 +48,7 @@
                             </group>
                             <group>
                                 <field name="active" widget="boolean_toggle" />
+                                <field name="dest_phone_4test" />
                             </group>
                         </group>
                         <group>
@@ -61,6 +61,9 @@
                             <group>
                                 <field name="instance_id"/>
                             </group>
+                        </group>
+                        <group string="Mensaje de bienvenida:">
+                            <field name="welcome_message" nolabel="1" placeholder="Mensaje de bienvenida"/>
                         </group>
                         <group>
                             <div class="col-lg-6 col-12 o_setting_box" attrs="{'invisible': [('whatsapp_authenticate','!=',False)]}">

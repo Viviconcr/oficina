@@ -70,13 +70,13 @@ class Whatsapp(http.Controller):
             whatsapp_obj = request.env['xwhatsapp.account']
             # crm_lead_id = ''
 
-            waccount_id = None if not instance_id else whatsapp_obj.sudo().search([('instance_id','=', instance_id )], limit=1)
+            waccount = None if not instance_id else whatsapp_obj.sudo().search([('instance_id','=', instance_id )], limit=1)
 
-            if not waccount_id:
+            if not waccount:
                 _logger.info('>> whatsapp_integration.whatsapp_lead_response: No está registrada una cuenta de Whatsapp con instance_id : %s', instance_id )
                 return
 
-            carga_inicial_desde_utime = int(round(float(time.mktime(waccount_id.fecha_desde_carga_inicial.timetuple())), 0))
+            carga_inicial_desde_utime = int(round(float(time.mktime(waccount.fecha_desde_carga_inicial.timetuple())), 0))
 
 
             # funcion que se usara más adelante
@@ -89,8 +89,9 @@ class Whatsapp(http.Controller):
                 sender = str(msg.get('senderName', 'Cliente'))
                 msg_utime = int(msg.get('time') or 0)
 
+                # télefono del "sender" del mensaje
                 parsed_phone = phonenumbers.parse(phone, 'CR')
-                parsed_phone = phonenumbers.format_number( parsed_phone , phonenumbers.PhoneNumberFormat.INTERNATIONAL )
+                parsed_phone = phonenumbers.format_number(parsed_phone, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
                 # parsed_phone = "+" + str(parsed_phone.country_code) + " " + str(parsed_phone.national_number)[:4] + " " + str(parsed_phone.national_number)[4:]
 
                 if msg.get('fromMe'):
@@ -121,6 +122,7 @@ class Whatsapp(http.Controller):
                     if not crm_lead_id:
                         if msg_utime < carga_inicial_desde_utime:
                             continue
+                        # es un lead Nuevo
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje NO es de FromMe y Debe crar un nuevo lead')
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
                         medium_id = request.env.ref('whatsapp_integration.utm_medium_whatsapp')
@@ -139,6 +141,10 @@ class Whatsapp(http.Controller):
                                                                             crm_lead_id.id,
                                                                             raise_exception=False,
                                                                             force_send=True)  # default_type='binary'
+                        if waccount.welcome_message and parsed_phone:
+                            msg_result = waccount.send_msg(parsed_phone, chat_id, waccount.welcome_message)
+                            if msg_result:
+                                _logger.info('>> whatsapp_integration.whatsapp_lead_response: Error enviando bienvenida: %s', msg_result)
                     else:
                         # ya existe el lead
                         crm_lead_id.sudo().write( {'x_estado_mensaje': 'done'} )
