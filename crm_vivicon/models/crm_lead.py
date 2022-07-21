@@ -166,6 +166,8 @@ class Lead(models.Model):
                     res.env['xcrm.lead.similares'].sudo().create({'lead_id': res.id, 'lead_similar_id': vid})
                 res.cantidad_similares = similares.get('cantidad_similares')
                 res.es_similar_a_otro = True
+        else:
+            _logger.info('>> crm.lead.create: len(res) = %s ', str(len(res)))
         return res
 
     def toggle_active(self):
