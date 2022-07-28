@@ -127,17 +127,17 @@ class Whatsapp(http.Controller):
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
                         medium_id = request.env.ref('whatsapp_integration.utm_medium_whatsapp')
                         utm_campaign = request.env['utm.campaign'].search([('whatsapp_account_id', '=', waccount.id)], limit=1)
-                        _logger.info('>> whatsapp_integration.whatsapp_lead_response: campaign %s', str(utm_campaign))
-                        crm_lead_id = crm_lead_obj.sudo().create({
-                                                                'name': msg.get('chatId'),
-                                                                'phone': parsed_phone,
-                                                                'x_chat_id': chat_id,
-                                                                'type': 'opportunity',
-                                                                'medium_id': medium_id.id,
-                                                                'source_id': source_id.id,
-                                                                'x_estado_mensaje': 'done',
-                                                                'campaign_id': (utm_campaign.id or False)
-                                                            })
+                        data = { 'name': msg.get('chatId'),
+                                'phone': parsed_phone,
+                                'x_chat_id': chat_id,
+                                'type': 'opportunity',
+                                'medium_id': medium_id.id,
+                                'source_id': source_id.id,
+                                'x_estado_mensaje': 'done'
+                                }
+                        if utm_campaign:
+                            data.update({'campaign_id': utm_campaign.id})
+                        crm_lead_id = crm_lead_obj.sudo().create(data)
                         email_template = request.env.ref('crm_vivicon.email_template_new_lead_whatsapp', False)
                         email_template.with_context(type='binary',
                                                     default_type='binary').send_mail(
