@@ -126,7 +126,7 @@ class Whatsapp(http.Controller):
                         _logger.info('>> whatsapp_integration.whatsapp_lead_response: El mensaje NO es de FromMe y Debe crar un nuevo lead')
                         source_id = request.env.ref('whatsapp_integration.utm_source_whatsapp')
                         medium_id = request.env.ref('whatsapp_integration.utm_medium_whatsapp')
-                        utm_campaign = self.env['utm.campaign'].search([('whatsapp_account_id', '=', waccount.id)], limit=1)
+                        utm_campaign = request.env['utm.campaign'].search([('whatsapp_account_id', '=', waccount.id)], limit=1)
                         crm_lead_id = crm_lead_obj.sudo().create({
                                                                 'name': msg.get('chatId'),
                                                                 'phone': parsed_phone,
