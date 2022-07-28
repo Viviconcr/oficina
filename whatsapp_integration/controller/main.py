@@ -139,11 +139,15 @@ class Whatsapp(http.Controller):
                             data.update({'campaign_id': utm_campaign.id})
                         crm_lead_id = crm_lead_obj.sudo().create(data)
                         email_template = request.env.ref('crm_vivicon.email_template_new_lead_whatsapp', False)
-                        email_template.with_context(type='binary',
-                                                    default_type='binary').send_mail(
-                                                                            crm_lead_id.id,
-                                                                            raise_exception=False,
-                                                                            force_send=True)  # default_type='binary'
+                        try:
+                            email_template.with_context(type='binary',
+                                                        default_type='binary').send_mail(
+                                                                                crm_lead_id.id,
+                                                                                raise_exception=False,
+                                                                                force_send=True)  # default_type='binary'
+                        except Exception as err:
+                            _logger.info('>> whatsapp_integration.whatsapp_lead_response: Error tratando de enviar correo interno: %s', str(err))
+                            
                         if waccount.welcome_message and parsed_phone:
                             msg_result = waccount.send_msg(parsed_phone, chat_id, waccount.welcome_message)
                             if msg_result:
