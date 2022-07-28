@@ -21,6 +21,7 @@
         'views/crm_metodos_pago_views.xml',
         'views/mail_activity_views.xml',
         'views/crm_lead_views.xml',
+        'views/utm_campaign_views.xml',
         'views/crm_projects_views.xml',
         'wizard/crm_lead_lost_views.xml',
         'views/menu_views.xml',
